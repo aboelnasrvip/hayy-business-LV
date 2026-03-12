@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+
+    /* HAYY Orange - #FE5D17 converted to HSL */
+    --primary: 21 99% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 20% 10%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 46%;
+
+    --accent: 21 99% 95%;
+    --accent-foreground: 21 99% 40%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 14% 96%;
+    --ring: 21 99% 55%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(21, 99%, 55%) 0%, hsl(35, 100%, 55%) 100%);
+    --gradient-dark: linear-gradient(135deg, hsl(220, 20%, 10%) 0%, hsl(220, 25%, 18%) 100%);
+    --gradient-glow: radial-gradient(circle at center, hsl(21, 99%, 55%, 0.15) 0%, transparent 70%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 20% 10% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 20% 10% / 0.1), 0 2px 4px -2px hsl(220 20% 10% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(220 20% 10% / 0.1), 0 4px 6px -4px hsl(220 20% 10% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(220 20% 10% / 0.1), 0 8px 10px -6px hsl(220 20% 10% / 0.1);
+    --shadow-glow: 0 0 40px hsl(21, 99%, 55%, 0.3);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 20% 10%;
+    --sidebar-primary: 21 99% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 21 99% 95%;
+    --sidebar-accent-foreground: 21 99% 40%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 21 99% 55%;
+  }
+
+  .dark {
+    --background: 220 25% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 25% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 25% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 21 99% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 25% 14%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 220 25% 14%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 21 99% 15%;
+    --accent-foreground: 21 99% 70%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 220 25% 18%;
+    --input: 220 25% 14%;
+    --ring: 21 99% 55%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(21, 99%, 55%) 0%, hsl(35, 100%, 60%) 100%);
+    --gradient-dark: linear-gradient(135deg, hsl(220, 25%, 6%) 0%, hsl(220, 30%, 12%) 100%);
+    --gradient-glow: radial-gradient(circle at center, hsl(21, 99%, 55%, 0.1) 0%, transparent 70%);
+
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 60px hsl(21, 99%, 55%, 0.25);
+
+    --sidebar-background: 220 25% 9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 21 99% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 21 99% 15%;
+    --sidebar-accent-foreground: 21 99% 70%;
+    --sidebar-border: 220 25% 18%;
+    --sidebar-ring: 21 99% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    text-align: right;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+
+  .bg-gradient-dark {
+    background-image: var(--gradient-dark);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glass {
+    @apply backdrop-blur-xl bg-card/80 border border-border/50;
+  }
+
+  .glass-strong {
+    @apply backdrop-blur-2xl bg-card/90 border border-border/60;
+  }
+}
