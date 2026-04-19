@@ -2,6 +2,43 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  city: string;
+}
+
+export interface LoginResponse {
+  personName: string;
+  id: string; 
+  email: string;
+  token: string;
+  expiration: string;
+  refreshToken: string;
+  refreshTokenExpirationDateTime: string;
+  userType: string;
+  verificationStatus: string;
+}
+
+export interface RefreshTokenResponse {
+  token: string;
+  expiration: string;
+  refreshToken: string;
+  refreshTokenExpirationDateTime: string;
+}
+
+export interface VerifyEmailOtpRequest {
+  email: string;
+  otp: string;
+}
+
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -20,103 +57,74 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export const authAPI = {
-  register: async (formData: FormData) => {
-    const response = await axios.post(`${API_BASE_URL}/api/web/auth/register`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
-  login: async (credentials: { email: string; password: string }) => {
+// Response Types
+export const authAPI = {
+  // Login
+  login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     const response = await axios.post(`${API_BASE_URL}/api/web/auth/login`, credentials);
     return response.data;
   },
 
-  // Google Login for Business (من الصورة)
-  googleLoginBusiness: async (data: { provider: string; idToken: string }) => {
-    const response = await axios.post(`${API_BASE_URL}/api/web/auth/google-login-business`, data);
+  // Register
+  register: async (data: FormData | RegisterRequest) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    
+    const response = await axios.post(`${API_BASE_URL}/api/web/auth/register`, data, config);
     return response.data;
   },
 
-  // Google Login (الأصلي)
-  googleLogin: async (data: { provider: string; idToken: string }) => {
-    const response = await axios.post(`${API_BASE_URL}/api/web/auth/google-login`, data);
-    return response.data;
-  },
-
-  logout: async () => {
-    const response = await axiosInstance.post('/api/web/auth/logout');
-    return response.data;
-  },
-
-  changePassword: async (data: { currentPassword: string; newPassword: string; confirmNewPassword: string }) => {
-    const response = await axiosInstance.post('/api/web/auth/change-password', data);
-    return response.data;
-  },
-
-  forgotPassword: async (email: string) => {
-    const response = await axios.post(`${API_BASE_URL}/api/web/auth/forgot-password`, { email });
-    return response.data;
-  },
-
-  resetPassword: async (data: { email: string; token: string; newPassword: string; confirmPassword: string }) => {
-    const response = await axios.post(`${API_BASE_URL}/api/web/auth/reset-password`, data);
-    return response.data;
-  },
-
-  confirmEmail: async (userId: string, token: string) => {
-    const response = await axios.get(`${API_BASE_URL}/api/web/auth/confirm-email`, {
-      params: { userId, token },
-    });
-    return response.data;
-  },
-
-  resendConfirmation: async (email: string) => {
-    const response = await axios.post(`${API_BASE_URL}/api/web/auth/resend-confirmation`, { email });
-    return response.data;
-  },
-
-  checkEmail: async (email: string) => {
-    const response = await axios.get(`${API_BASE_URL}/api/web/auth/check-email`, {
-      params: { email },
-    });
-    return response.data;
-  },
-
-  getCurrentUser: async () => {
-    const response = await axiosInstance.get('/api/web/auth/me');
-    return response.data;
-  },
-
-  refreshToken: async (accessToken: string, refreshToken: string) => {
+  // ✅ Refresh Token
+  refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
     const response = await axios.post(`${API_BASE_URL}/api/web/auth/refresh-token`, {
-      accessToken,
       refreshToken,
     });
     return response.data;
   },
 
-  revokeToken: async (token: string) => {
-    const response = await axiosInstance.post('/api/web/auth/revoke-token', { token });
+  // Verify Email OTP
+  verifyEmailOtp: async (data: VerifyEmailOtpRequest) => {
+    const response = await axios.post(`${API_BASE_URL}/api/web/auth/verify-email-otp`, data);
     return response.data;
   },
 
-  // Create Admin (يتطلب صلاحيات Admin)
-  createAdmin: async (formData: FormData) => {
-    const response = await axiosInstance.post('/api/web/auth/create-admin', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  // Resend Verification Email
+  resendVerificationEmail: async (email: string) => {
+    const response = await axios.post(`${API_BASE_URL}/api/web/auth/resend-verification-email`, { email });
     return response.data;
   },
 
-  // Make Admin (يتطلب صلاحيات Admin)
-  makeAdmin: async (email: string) => {
-    const response = await axiosInstance.post(`/api/web/auth/make-admin?email=${encodeURIComponent(email)}`);
+  // Forgot Password
+  forgotPassword: async (email: string) => {
+    const response = await axios.post(`${API_BASE_URL}/api/web/auth/forgot-password`, { email });
+    return response.data;
+  },
+
+  // Reset Password
+  resetPassword: async (data: { email: string; token: string; password: string; confirmPassword: string }) => {
+    const response = await axios.post(`${API_BASE_URL}/api/web/auth/reset-password`, data);
+    return response.data;
+  },
+
+  // Logout
+  logout: async () => {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(
+      `${API_BASE_URL}/api/web/auth/logout`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   },
 };

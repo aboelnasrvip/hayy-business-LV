@@ -99,44 +99,49 @@ const BusinessOnboarding = () => {
 
       {/* Progress Steps */}
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-12">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = currentStep >= step.number;
-            const isCompleted = currentStep > step.number;
+        <div className="mb-12 flex justify-center">
+          <div className="w-full max-w-2xl">
+            <div className="flex items-center justify-center gap-4">
+              {steps.map((step, index) => {
+                const Icon = step.icon;
+                const isActive = currentStep >= step.number;
+                const isCompleted = currentStep > step.number;
 
-            return (
-              <div key={step.number} className="flex items-center flex-1">
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                      isCompleted
-                        ? "bg-green-500 text-white"
-                        : isActive
-                        ? "bg-primary text-white"
-                        : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                    }`}
-                  >
-                    {isCompleted ? <Check size={24} /> : <Icon size={24} />}
+                return (
+                  <div key={step.number} className="flex items-center">
+                    <div className="flex flex-col items-center min-w-[120px]">
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                          isCompleted
+                            ? "bg-green-500 text-white"
+                            : isActive
+                            ? "bg-primary text-white"
+                            : "bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                        }`}
+                      >
+                        {isCompleted ? <Check size={24} /> : <Icon size={24} />}
+                      </div>
+                      <span
+                        className={`mt-2 text-sm font-medium text-center ${
+                          isActive ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"
+                        }`}
+                      >
+                        {step.title}
+                      </span>
+                    </div>
+
+                    {index < steps.length - 1 && (
+                      <div
+                        className={`w-24 h-1 rounded transition-all ${
+                          currentStep > step.number ? "bg-primary" : "bg-gray-200 dark:bg-gray-700"
+                        }`}
+                      />
+                    )}
                   </div>
-                  <span
-                    className={`mt-2 text-sm font-medium ${
-                      isActive ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"
-                    }`}
-                  >
-                    {step.title}
-                  </span>
-                </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={`flex-1 h-1 mx-4 rounded transition-all ${
-                      currentStep > step.number ? "bg-primary" : "bg-gray-200 dark:bg-gray-700"
-                    }`}
-                  />
-                )}
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Form */}
@@ -384,6 +389,7 @@ const BusinessOnboarding = () => {
             )}
           </form>
         </div>
+        
       </div>
     </div>
   );

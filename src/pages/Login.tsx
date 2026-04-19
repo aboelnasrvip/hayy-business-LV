@@ -17,24 +17,51 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(clearError());
+  e.preventDefault();
+  dispatch(clearError());
 
-    try {
-      await dispatch(login(formData)).unwrap();
-      toast.success("Login successful!");
-      navigate("/dashboard");
-    } catch (err: any) {
+  try {
+    const response = await dispatch(login(formData)).unwrap();
+    
+    toast.success("Login successful!");
+
+    // 🎯 التوجيه بناءً على verificationStatus
+    if (response.verificationStatus === "New") {
+      navigate("/business/onboarding");
+    } else if (response.verificationStatus === "Pending" || response.verificationStatus === "PendingVerification") {
+      navigate("/onboarding/pending");
+    } else if (response.verificationStatus === "Approved" || response.verificationStatus === "Verified") {
+      const hasActiveSubscription = localStorage.getItem('hasActiveSubscription') === 'true';
+      
+      if (!hasActiveSubscription) {
+        navigate("/subscription-plans");
+      } else {
+        navigate("/dashboard");
+      }
+    } else if (response.verificationStatus === "Rejected") {
+      navigate("/onboarding/pending");
+    } else if (response.verificationStatus === "Suspended") {
+      navigate("/onboarding/pending");
+    } else {
+      navigate("/subscription-plans");
+    }
+  } catch (err: any) {
+    // ✅ إذا كان الإيميل غير مؤكد
+    if (err?.includes("email") || err?.includes("verify") || err?.includes("confirm")) {
+      toast.error("Please verify your email first");
+      navigate(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+    } else {
       toast.error(err || "Login failed");
     }
-  };
+  }
+};
 
   const handleGoogleLogin = async () => {
-    // استخدام googleLoginBusiness من الصورة
     toast.error("Google login integration required");
     // عند التكامل مع Google OAuth:
     // const googleToken = await getGoogleToken();
-    // dispatch(googleLoginBusiness({ provider: "Google", idToken: googleToken }));
+    // const response = await dispatch(googleLoginBusiness({ provider: "Google", idToken: googleToken })).unwrap();
+    // نفس اللوجيك السابق للتوجيه
   };
 
   return (
