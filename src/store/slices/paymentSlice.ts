@@ -1,13 +1,11 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { paymentAPI, SubscriptionPlan, InitiatePaymentRequest } from '@/services/paymentService';
-import { setSubscriptionStatus } from './authSlice';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { paymentAPI, SubscriptionPlan, PaymentInitiateRequest } from '@/services/paymentService';
 
 interface PaymentState {
   plans: SubscriptionPlan[];
   selectedPlan: SubscriptionPlan | null;
   isLoading: boolean;
   error: string | null;
-  isProcessing: boolean;
 }
 
 const initialState: PaymentState = {
@@ -15,29 +13,43 @@ const initialState: PaymentState = {
   selectedPlan: null,
   isLoading: false,
   error: null,
-  isProcessing: false,
 };
 
+// ✅ Fetch All Subscription Plans
 export const fetchSubscriptionPlans = createAsyncThunk(
   'payment/fetchPlans',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await paymentAPI.getSubscriptionPlans();
-      return response;
+      const plans = await paymentAPI.getPlans();
+      return plans;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.title || 'Failed to fetch plans');
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch plans');
     }
   }
 );
 
+// ✅ Fetch Plan By ID
+export const fetchPlanById = createAsyncThunk(
+  'payment/fetchPlanById',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const plan = await paymentAPI.getPlanById(id);
+      return plan;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch plan');
+    }
+  }
+);
+
+// ✅ Initiate Payment
 export const initiatePayment = createAsyncThunk(
-  'payment/initiatePayment',
-  async (data: InitiatePaymentRequest, { rejectWithValue }) => {
+  'payment/initiate',
+  async (data: PaymentInitiateRequest, { rejectWithValue }) => {
     try {
       const response = await paymentAPI.initiatePayment(data);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.title || 'Payment initiation failed');
+      return rejectWithValue(error.response?.data?.message || 'Payment initiation failed');
     }
   }
 );
@@ -46,11 +58,11 @@ const paymentSlice = createSlice({
   name: 'payment',
   initialState,
   reducers: {
+    selectPlan: (state, action: PayloadAction<SubscriptionPlan>) => {
+      state.selectedPlan = action.payload;
+    },
     clearError: (state) => {
       state.error = null;
-    },
-    selectPlan: (state, action) => {
-      state.selectedPlan = action.payload;
     },
     clearSelectedPlan: (state) => {
       state.selectedPlan = null;
@@ -58,6 +70,7 @@ const paymentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch All Plans
       .addCase(fetchSubscriptionPlans.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -70,19 +83,35 @@ const paymentSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+
+      // Fetch Plan By ID
+      .addCase(fetchPlanById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchPlanById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedPlan = action.payload;
+      })
+      .addCase(fetchPlanById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Initiate Payment
       .addCase(initiatePayment.pending, (state) => {
-        state.isProcessing = true;
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(initiatePayment.fulfilled, (state) => {
-        state.isProcessing = false;
+        state.isLoading = false;
       })
       .addCase(initiatePayment.rejected, (state, action) => {
-        state.isProcessing = false;
+        state.isLoading = false;
         state.error = action.payload as string;
       });
   },
 });
 
-export const { clearError, selectPlan, clearSelectedPlan } = paymentSlice.actions;
+export const { selectPlan, clearError, clearSelectedPlan } = paymentSlice.actions;
 export default paymentSlice.reducer;

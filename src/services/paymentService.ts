@@ -1,79 +1,79 @@
-import axios from 'axios';
-import { authAPI } from './authService';
+import axiosInstance from './axiosInstance';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  durationDays: number;
+  aiPowerLevel: number;
+  isActive: boolean;
+}
 
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-});
+export interface PaymentInitiateRequest {
+  planId: string;
+  businessId: string;
+  eventBookingId?: string;
+}
 
-// ✅ Request Interceptor
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+export interface PaymentInitiateResponse {
+  paymentUrl: string;
+  orderId: string;
+}
 
-// ✅ Response Interceptor
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        
-        if (!refreshToken) {
-          localStorage.clear();
-          window.location.href = '/login';
-          return Promise.reject(error);
-        }
-
-        const response = await authAPI.refreshToken(refreshToken);
-        const { token, refreshToken: newRefreshToken, expiration, refreshTokenExpirationDateTime } = response;
-
-        localStorage.setItem('token', token);
-        localStorage.setItem('refreshToken', newRefreshToken);
-        localStorage.setItem('tokenExpiration', expiration);
-        localStorage.setItem('refreshTokenExpiration', refreshTokenExpirationDateTime);
-
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        localStorage.clear();
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
+export interface PaymobWebhookPayload {
+  type: string;
+  obj: {
+    id: number;
+    order: {
+      id: number;
+    };
+    success: boolean;
+    amount_cents: number;
+    currency: string;
+    created_at: string;
+    error_occured: boolean;
+    source_data: {
+      pan: string;
+      sub_type: string;
+      type: string;
+    };
+    has_parent_transaction: boolean;
+    integration_id: number;
+    is_3d_secure: boolean;
+    is_auth: boolean;
+    is_capture: boolean;
+    is_refunded: boolean;
+    is_standalone_payment: boolean;
+    is_voided: boolean;
+    owner: number;
+    pending: boolean;
+  };
+  hmac: string;
+}
 
 export const paymentAPI = {
-  // Initiate Payment
-  initiatePayment: async (data: { planId: string; businessId: string }) => {
-    const response = await axiosInstance.post('/api/web/Payment/initiate', data);
+  // ✅ GET /api/SubscriptionPlans - جلب كل الخطط
+  getPlans: async (): Promise<SubscriptionPlan[]> => {
+    const response = await axiosInstance.get('/api/SubscriptionPlans');
     return response.data;
   },
 
-  // Verify Payment
-  verifyPayment: async (paymentId: string) => {
-    const response = await axiosInstance.get(`/api/web/Payment/verify/${paymentId}`);
+  // ✅ GET /api/SubscriptionPlans/{id} - جلب خطة محددة
+  getPlanById: async (id: string): Promise<SubscriptionPlan> => {
+    const response = await axiosInstance.get(`/api/SubscriptionPlans/${id}`);
     return response.data;
   },
 
-  // Get Subscription Info
-  getSubscription: async () => {
-    const response = await axiosInstance.get('/api/web/Payment/subscription');
+  // ✅ POST /api/Payments/initiate - بدء عملية الدفع
+  initiatePayment: async (data: PaymentInitiateRequest): Promise<PaymentInitiateResponse> => {
+    const response = await axiosInstance.post('/api/Payments/initiate', data);
+    return response.data;
+  },
+
+  // ✅ POST /api/Payments/webhook - معالجة Webhook من Paymob
+  handleWebhook: async (data: PaymobWebhookPayload, hmac: string) => {
+    const response = await axiosInstance.post(`/api/Payments/webhook?hmac=${hmac}`, data);
     return response.data;
   },
 };
