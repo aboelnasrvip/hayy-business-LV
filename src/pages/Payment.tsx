@@ -5,6 +5,8 @@ import { initiatePayment } from "@/store/slices/paymentSlice";
 import { CreditCard, Loader, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
+const PAYMOB_IFRAME_ID = "1007665"; // ✅ من الصورة
+
 const Payment = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -14,6 +16,8 @@ const Payment = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { isLoading } = useAppSelector((state) => state.payment);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentKey, setPaymentKey] = useState<string | null>(null);
+  const [showIframe, setShowIframe] = useState(false);
 
   useEffect(() => {
     if (!plan) {
@@ -21,6 +25,30 @@ const Payment = () => {
       navigate("/subscription-plans");
     }
   }, [plan, navigate]);
+
+  // ✅ معالجة Iframe Callback
+  useEffect(() => {
+    const handlePaymentCallback = (event: MessageEvent) => {
+      // تأكد إن الـ message جاي من Paymob
+      if (event.origin !== "https://accept.paymob.com") return;
+
+      const data = event.data;
+      
+      if (data.success) {
+        toast.success("Payment successful!");
+        navigate("/payment/success", { 
+          state: { paymentId: data.id || data.transaction_id } 
+        });
+      } else if (data.error) {
+        toast.error("Payment failed: " + (data.error_message || "Unknown error"));
+        setShowIframe(false);
+        setPaymentKey(null);
+      }
+    };
+
+    window.addEventListener("message", handlePaymentCallback);
+    return () => window.removeEventListener("message", handlePaymentCallback);
+  }, [navigate]);
 
   const handlePayment = async () => {
     if (!user?.id || !plan?.id) {
@@ -38,11 +66,12 @@ const Payment = () => {
         })
       ).unwrap();
 
-      if (result.paymentUrl) {
-        // ✅ تحويل للـ Payment Gateway
-        window.location.href = result.paymentUrl;
+      if (result.paymentKey) {
+        // ✅ عرض الـ iframe
+        setPaymentKey(result.paymentKey);
+        setShowIframe(true);
       } else {
-        toast.error("Failed to get payment URL");
+        toast.error("Failed to get payment key");
       }
     } catch (error: any) {
       toast.error(error || "Payment failed");
@@ -53,6 +82,35 @@ const Payment = () => {
 
   if (!plan) return null;
 
+  // ✅ إذا تم الحصول على payment key، اعرض الـ iframe
+  if (showIframe && paymentKey) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="bg-white shadow-sm p-4">
+          <button
+            onClick={() => {
+              setShowIframe(false);
+              setPaymentKey(null);
+            }}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft size={20} />
+            Cancel Payment
+          </button>
+        </div>
+        
+        <div className="flex-1 p-4">
+          <iframe
+            src={`https://accept.paymob.com/api/acceptance/iframes/${PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`}
+            className="w-full h-full min-h-[600px] border-0 rounded-lg shadow-lg"
+            title="Paymob Payment"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ صفحة تأكيد الدفع
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">

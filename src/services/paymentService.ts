@@ -17,8 +17,9 @@ export interface PaymentInitiateRequest {
 }
 
 export interface PaymentInitiateResponse {
-  paymentUrl: string;
+  paymentKey: string;  // ✅ Payment Token
   orderId: string;
+  iframeUrl?: string;  
 }
 
 export interface PaymobWebhookPayload {
