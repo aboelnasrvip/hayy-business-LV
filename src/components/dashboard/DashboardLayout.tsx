@@ -1,24 +1,26 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FileText, MessageSquare, Star, Palette, Settings, LogOut, Menu, X, Bell, Sun, Moon, ChevronDown } from "lucide-react";
+import { Link, useLocation, Outlet } from "react-router-dom";
+import { LayoutDashboard, FileText, MessageSquare, Star, Palette, Settings, LogOut, Menu, X, Bell, Sun, Moon, ChevronDown, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+import { useAppDispatch } from "@/store/hooks";
+import { logout } from "@/store/slices/authSlice";
+import { useNavigate } from "react-router-dom";
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
-
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { theme, setTheme } = useTheme();
   const { t, direction } = useLanguage();
 
   const menuItems = [
     { icon: LayoutDashboard, labelKey: "sidebar.dashboard", path: "/dashboard" },
+    { icon: MapPin, labelKey: "sidebar.places", path: "/dashboard/places" },
     { icon: FileText, labelKey: "sidebar.posts", path: "/dashboard/posts" },
     { icon: MessageSquare, labelKey: "sidebar.comments", path: "/dashboard/comments" },
     { icon: Star, labelKey: "sidebar.ratings", path: "/dashboard/ratings" },
@@ -27,6 +29,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = async () => {
+    await dispatch(logout());
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen bg-background flex" dir={direction}>
@@ -66,7 +73,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
           <nav className="flex-1 p-4 space-y-1">
             {menuItems.map((item) => (
-              <Link key={item.path} to={item.path}>
+              <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
                 <motion.div
                   whileHover={{ x: direction === "rtl" ? -4 : 4 }}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
@@ -94,7 +101,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </div>
 
-            <button className="flex items-center gap-3 px-4 py-3 mt-2 w-full text-destructive hover:bg-destructive/10 rounded-xl transition-colors">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-3 mt-2 w-full text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
+            >
               <LogOut className="w-5 h-5" />
               <span className="font-medium">{t("dashboard.signOut")}</span>
             </button>
@@ -138,7 +148,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8">{children}</main>
+        {/* Outlet */}
+        <main className="flex-1 p-4 lg:p-8">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

@@ -73,6 +73,12 @@ export const authAPI = {
     return response.data;
   },
 
+  // داخل authAPI object، بعد login:
+  googleLogin: async (data: { provider: string; idToken: string }): Promise<LoginResponse> => {
+    const response = await axios.post(`${API_BASE_URL}/api/web/auth/google-login`, data);
+    return response.data;
+  },
+
   // Register
   register: async (data: FormData | RegisterRequest) => {
     const config = data instanceof FormData 

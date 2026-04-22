@@ -197,6 +197,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Sidebar
     "sidebar.dashboard": "Dashboard",
+    "sidebar.places": "Places",
     "sidebar.posts": "Posts",
     "sidebar.comments": "Comments",
     "sidebar.ratings": "Ratings",

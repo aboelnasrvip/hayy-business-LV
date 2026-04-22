@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
+/* Leaflet styles */
+@import 'leaflet/dist/leaflet.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -159,5 +160,112 @@
 
   .glass-strong {
     @apply backdrop-blur-2xl bg-card/90 border border-border/60;
+  }
+}
+
+/* ============================================
+   NEUMORPHIC LOGIN — Color System
+   Light:  bg #e0e5ec | shadow dark #b8bec7 | shadow light #fff
+   Dark:   bg #1a1d2e | card #252838 | shadow dark #12151f | shadow light #2e3248
+   Brand orange: hsl(21, 99%, 55%) = #FE5D17
+   ============================================ */
+
+:root {
+  --neu-bg:      #e0e5ec;
+  --neu-surface: #e0e5ec;
+  --neu-s1:      #b8bec7;   /* shadow — dark side  */
+  --neu-s2:      #ffffff;   /* shadow — light side */
+}
+
+.dark {
+  --neu-bg:      #1a1d2e;
+  --neu-surface: #252838;
+  --neu-s1:      #12151f;
+  --neu-s2:      #2e3248;
+}
+
+@layer components {
+
+  /* ── Page wrapper ── */
+  .neu-page {
+    @apply relative min-h-screen flex items-center justify-center p-6;
+    background-color: var(--neu-bg);
+  }
+
+  /* ── Card ── */
+  .neu-card {
+    @apply rounded-[2rem] p-8;
+    background-color: var(--neu-surface);
+    box-shadow:
+      10px 10px 22px var(--neu-s1),
+      -10px -10px 22px var(--neu-s2);
+  }
+
+  /* ── Circular logo wrapper ── */
+  .neu-logo {
+    @apply w-[80px] h-[80px] rounded-full flex items-center justify-center mx-auto;
+    background-color: var(--neu-surface);
+    box-shadow:
+      6px 6px 14px var(--neu-s1),
+      -6px -6px 14px var(--neu-s2);
+  }
+
+  /* ── Input wrapper (inset) ── */
+  .neu-input {
+    @apply flex items-center gap-3 px-5 py-[13px] rounded-full;
+    background-color: var(--neu-surface);
+    box-shadow:
+      inset 5px 5px 10px var(--neu-s1),
+      inset -5px -5px 10px var(--neu-s2);
+  }
+
+  /* ── Primary button — orange, raised ── */
+  .neu-btn-primary {
+    @apply w-full py-[14px] rounded-full font-bold text-white text-sm
+           tracking-widest uppercase transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    background: linear-gradient(to right, hsl(21 99% 55%), hsl(28 100% 52%));
+    box-shadow:
+      5px 5px 14px var(--neu-s1),
+      -3px -3px 8px var(--neu-s2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .neu-btn-primary:not(:disabled):hover {
+    box-shadow:
+      3px 3px 8px var(--neu-s1),
+      -1px -1px 4px var(--neu-s2);
+  }
+  .neu-btn-primary:not(:disabled):active {
+    box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.28);
+  }
+
+  /* ── Ghost button — raised, no fill ── */
+  .neu-btn-ghost {
+    @apply w-full flex items-center justify-center gap-2 py-3
+           rounded-full text-sm font-medium transition-all duration-200;
+    background-color: var(--neu-surface);
+    box-shadow:
+      4px 4px 9px var(--neu-s1),
+      -4px -4px 9px var(--neu-s2);
+  }
+  .neu-btn-ghost:hover {
+    box-shadow:
+      2px 2px 5px var(--neu-s1),
+      -2px -2px 5px var(--neu-s2);
+  }
+
+  /* ── Theme toggle (corner) ── */
+  .neu-toggle {
+    @apply absolute top-5 left-5 w-10 h-10 flex items-center
+           justify-center rounded-xl transition-all duration-200;
+    background-color: var(--neu-surface);
+    box-shadow:
+      4px 4px 8px var(--neu-s1),
+      -4px -4px 8px var(--neu-s2);
+  }
+  .neu-toggle:hover {
+    box-shadow:
+      2px 2px 4px var(--neu-s1),
+      -2px -2px 4px var(--neu-s2);
   }
 }

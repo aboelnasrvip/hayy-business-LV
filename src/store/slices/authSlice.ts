@@ -1,5 +1,10 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { authAPI, LoginRequest, LoginResponse, RegisterRequest } from '@/services/authService';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import {
+  authAPI,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+} from "@/services/authService";
 
 interface User {
   id: string;
@@ -22,61 +27,92 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
-  token: localStorage.getItem('token'),
-  refreshToken: localStorage.getItem('refreshToken'),
-  tokenExpiration: localStorage.getItem('tokenExpiration'),
-  refreshTokenExpiration: localStorage.getItem('refreshTokenExpiration'),
-  isAuthenticated: !!localStorage.getItem('token'),
+  user: JSON.parse(localStorage.getItem("user") || "null"),
+  token: localStorage.getItem("token"),
+  refreshToken: localStorage.getItem("refreshToken"),
+  tokenExpiration: localStorage.getItem("tokenExpiration"),
+  refreshTokenExpiration: localStorage.getItem("refreshTokenExpiration"),
+  isAuthenticated: !!localStorage.getItem("token"),
   isLoading: false,
   error: null,
-  verificationStatus: localStorage.getItem('verificationStatus'),
+  verificationStatus: localStorage.getItem("verificationStatus"),
 };
 
 // Login Thunk
 export const login = createAsyncThunk(
-  'auth/login',
+  "auth/login",
   async (credentials: LoginRequest, { rejectWithValue }) => {
     try {
       const response: LoginResponse = await authAPI.login(credentials);
       return response;
     } catch (error: any) {
-      const message = error.response?.data?.title || error.response?.data?.message || error.message || 'Login failed';
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.title ||
+        error.response?.data?.message ||
+        error.message ||
+        "Login failed";
       return rejectWithValue(message);
     }
-  }
+  },
+);
+
+export const googleLoginBusiness = createAsyncThunk(
+  "auth/googleLogin",
+  async (idToken: string, { rejectWithValue }) => {
+    try {
+      const response: LoginResponse = await authAPI.googleLogin({
+        provider: "Google",
+        idToken,
+      });
+      return response;
+    } catch (error: any) {
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.title ||
+        error.response?.data?.message ||
+        error.message ||
+        "Login failed";
+      return rejectWithValue(message);
+    }
+  },
 );
 
 // Register Thunk
 export const register = createAsyncThunk(
-  'auth/register',
+  "auth/register",
   async (userData: FormData | RegisterRequest, { rejectWithValue }) => {
     try {
       const response = await authAPI.register(userData);
       return response;
     } catch (error: any) {
-      const message = error.response?.data?.title || error.response?.data?.message || error.message || 'Registration failed';
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.title ||
+        error.response?.data?.message ||
+        error.message ||
+        "Registration failed";
       return rejectWithValue(message);
     }
-  }
+  },
 );
 
 // Logout Thunk
 export const logout = createAsyncThunk(
-  'auth/logout',
+  "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
       await authAPI.logout();
     } catch (error: any) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       localStorage.clear();
     }
-  }
+  },
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -84,7 +120,7 @@ const authSlice = createSlice({
     },
     setVerificationStatus: (state, action: PayloadAction<string>) => {
       state.verificationStatus = action.payload;
-      localStorage.setItem('verificationStatus', action.payload);
+      localStorage.setItem("verificationStatus", action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -99,7 +135,8 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
         state.tokenExpiration = action.payload.expiration;
-        state.refreshTokenExpiration = action.payload.refreshTokenExpirationDateTime;
+        state.refreshTokenExpiration =
+          action.payload.refreshTokenExpirationDateTime;
         state.isAuthenticated = true;
         state.verificationStatus = action.payload.verificationStatus;
 
@@ -111,15 +148,59 @@ const authSlice = createSlice({
           userType: action.payload.userType,
           isEmailConfirmed: true,
         };
-        
-        localStorage.setItem('user', JSON.stringify(state.user));
-        localStorage.setItem('token', action.payload.token);
-        localStorage.setItem('refreshToken', action.payload.refreshToken);
-        localStorage.setItem('tokenExpiration', action.payload.expiration);
-        localStorage.setItem('refreshTokenExpiration', action.payload.refreshTokenExpirationDateTime);
-        localStorage.setItem('verificationStatus', action.payload.verificationStatus);
+
+        localStorage.setItem("user", JSON.stringify(state.user));
+        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("refreshToken", action.payload.refreshToken);
+        localStorage.setItem("tokenExpiration", action.payload.expiration);
+        localStorage.setItem(
+          "refreshTokenExpiration",
+          action.payload.refreshTokenExpirationDateTime,
+        );
+        localStorage.setItem(
+          "verificationStatus",
+          action.payload.verificationStatus,
+        );
       })
       .addCase(login.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      .addCase(googleLoginBusiness.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(googleLoginBusiness.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
+        state.tokenExpiration = action.payload.expiration;
+        state.refreshTokenExpiration =
+          action.payload.refreshTokenExpirationDateTime;
+        state.isAuthenticated = true;
+        state.verificationStatus = action.payload.verificationStatus;
+        state.user = {
+          id: action.payload.id,
+          fullName: action.payload.personName,
+          email: action.payload.email,
+          userType: action.payload.userType,
+          isEmailConfirmed: true,
+        };
+        localStorage.setItem("user", JSON.stringify(state.user));
+        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("refreshToken", action.payload.refreshToken);
+        localStorage.setItem("tokenExpiration", action.payload.expiration);
+        localStorage.setItem(
+          "refreshTokenExpiration",
+          action.payload.refreshTokenExpirationDateTime,
+        );
+        localStorage.setItem(
+          "verificationStatus",
+          action.payload.verificationStatus,
+        );
+      })
+      .addCase(googleLoginBusiness.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })

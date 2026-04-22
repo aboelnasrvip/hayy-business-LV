@@ -123,7 +123,6 @@ const Dashboard = () => {
   };
 
   return (
-    <DashboardLayout>
       <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
 
         {/* ── Welcome ── */}
@@ -385,7 +384,6 @@ const Dashboard = () => {
         </motion.div>
 
       </motion.div>
-    </DashboardLayout>
   );
 };
 

@@ -1,14 +1,31 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { register, clearError } from "@/store/slices/authSlice";
-import { Eye, EyeOff, ArrowRight, Upload } from "lucide-react";
+import {
+  register,
+  googleLoginBusiness,
+  clearError,
+} from "@/store/slices/authSlice";
+import {
+  Eye,
+  EyeOff,
+  Upload,
+  Sun,
+  Moon,
+  Lock,
+  User,
+  MapPin,
+  Mail,
+} from "lucide-react";
 import { toast } from "sonner";
+import { useTheme } from "@/components/ui/ThemeProvider";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const Register = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { isLoading, error } = useAppSelector((state) => state.auth);
+  const { theme, setTheme } = useTheme();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -28,9 +45,7 @@ const Register = () => {
     if (file) {
       setImage(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
@@ -38,17 +53,11 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(clearError());
-
-    if (!agreedToTerms) {
-      toast.error("Please agree to the Terms of Service and Privacy Policy");
-      return;
-    }
-
+    
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-
     try {
       const submitData = new FormData();
       submitData.append("FullName", formData.fullName);
@@ -56,50 +65,114 @@ const Register = () => {
       submitData.append("Password", formData.password);
       submitData.append("ConfirmPassword", formData.confirmPassword);
       submitData.append("City", formData.city);
-      if (image) {
-        submitData.append("image", image);
-      }
-
+      if (image) submitData.append("image", image);
       await dispatch(register(submitData as any)).unwrap();
-      toast.success("Registration successful! Please check your email for verification code.");
+      toast.success(
+        "Registration successful! Please check your email for verification code.",
+      );
       navigate(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (err: any) {
       toast.error(err || "Registration failed");
     }
   };
 
-  const handleGoogleSignup = () => {
-    toast.error("Google signup integration required");
-  };
+  const handleGoogleSignup = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const response = await dispatch(
+          googleLoginBusiness(tokenResponse.access_token),
+        ).unwrap();
+        toast.success("Google signup successful!");
+        if (response.verificationStatus === "New") {
+          navigate("/business/onboarding");
+        } else if (
+          response.verificationStatus === "Pending" ||
+          response.verificationStatus === "PendingVerification"
+        ) {
+          navigate("/onboarding/pending");
+        } else if (
+          response.verificationStatus === "Approved" ||
+          response.verificationStatus === "Verified"
+        ) {
+          const hasActiveSubscription =
+            localStorage.getItem("hasActiveSubscription") === "true";
+          navigate(
+            hasActiveSubscription ? "/dashboard" : "/subscription-plans",
+          );
+        } else {
+          navigate("/subscription-plans");
+        }
+      } catch (err: any) {
+        toast.error(err || "Google signup failed");
+      }
+    },
+    onError: () => toast.error("Google signup failed"),
+  });
+
+  const inputRow =
+    "flex items-center gap-3 px-5 py-[13px] rounded-full " +
+    "bg-[#e0e5ec] shadow-[inset_5px_5px_10px_#b8bec7,inset_-5px_-5px_10px_#ffffff] " +
+    "dark:bg-[#252838] dark:shadow-[inset_4px_4px_10px_#12151f,inset_-2px_-2px_6px_#2e3248]";
+
+  const inputField =
+    "flex-1 min-w-0 bg-transparent outline-none text-sm " +
+    "text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500";
+
+  const iconCls = "text-gray-400 dark:text-gray-500 shrink-0";
 
   return (
-    <div className="min-h-screen bg-[#1a1d29] flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Create Account</h1>
-          <p className="text-gray-400">Join Hayy and grow your business</p>
-        </div>
+    <div
+      dir="ltr"
+      className="relative min-h-screen flex items-center justify-center p-6 bg-[#e0e5ec] dark:bg-[#1a1d2e]"
+    >
+      {/* Theme Toggle */}
+      <button
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        aria-label="Toggle theme"
+        className="absolute top-5 left-5 w-10 h-10 flex items-center justify-center rounded-xl transition-all
+          bg-[#e0e5ec] shadow-[4px_4px_8px_#b8bec7,-4px_-4px_8px_#ffffff]
+          hover:shadow-[2px_2px_4px_#b8bec7,-2px_-2px_4px_#ffffff]
+          dark:bg-[#252838] dark:shadow-[3px_3px_7px_#12151f,-3px_-3px_7px_#2e3248]"
+      >
+        {theme === "dark" ? (
+          <Sun size={18} className="text-primary" />
+        ) : (
+          <Moon size={18} className="text-gray-500" />
+        )}
+      </button>
 
-        {/* Form Card */}
-        <div className="bg-[#252837] rounded-2xl shadow-2xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Profile Image Upload */}
-            <div className="flex justify-center mb-6">
+      <div className="w-full max-w-[420px] py-8">
+        <div
+          className="rounded-[2rem] p-8
+          bg-[#e0e5ec] shadow-[10px_10px_22px_#b8bec7,-10px_-10px_22px_#ffffff]
+          dark:bg-[#252838] dark:shadow-[8px_8px_20px_#12151f,-8px_-8px_20px_#2e3248]"
+        >
+          
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Profile Image */}
+            <div className="flex justify-center pb-1">
               <div className="relative">
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-gray-700"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center">
-                    <Upload className="text-gray-500" size={32} />
-                  </div>
-                )}
-                <label className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-orange-600 transition-colors">
-                  <Upload className="text-white" size={16} />
+                <div
+                  className="w-[72px] h-[72px] rounded-full overflow-hidden flex items-center justify-center
+                  bg-[#e0e5ec] shadow-[5px_5px_10px_#b8bec7,-5px_-5px_10px_#ffffff]
+                  dark:bg-[#2e3248] dark:shadow-[3px_3px_8px_#12151f,-3px_-3px_8px_#343751]"
+                >
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Upload className={iconCls} size={24} />
+                  )}
+                </div>
+                <label
+                  className="absolute bottom-0 right-0 w-6 h-6 bg-primary rounded-full
+                  flex items-center justify-center cursor-pointer hover:bg-orange-600 transition-colors shadow-md"
+                >
+                  <Upload className="text-white" size={12} />
                   <input
                     type="file"
                     accept="image/*"
@@ -110,190 +183,171 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Two Column Layout for Name and City */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Full Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#1a1d29] border border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-white placeholder-gray-500"
-                  placeholder="John Doe"
-                />
-              </div>
+            {/* Full Name */}
+            <div className={inputRow}>
+              <User size={16} className={iconCls} />
+              <input
+                type="text"
+                required
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
+                placeholder="Full Name"
+                className={inputField}
+              />
+            </div>
 
-              {/* City */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  City
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#1a1d29] border border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-white placeholder-gray-500"
-                  placeholder="London"
-                />
-              </div>
+            {/* City */}
+            <div className={inputRow}>
+              <MapPin size={16} className={iconCls} />
+              <input
+                type="text"
+                required
+                value={formData.city}
+                onChange={(e) =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
+                placeholder="City"
+                className={inputField}
+              />
             </div>
 
             {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address
-              </label>
+            <div className={inputRow}>
+              <Mail size={16} className={iconCls} />
               <input
                 type="email"
                 required
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-[#1a1d29] border border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-white placeholder-gray-500"
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 placeholder="you@example.com"
+                className={inputField}
               />
             </div>
 
-            {/* Two Column Layout for Passwords */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#1a1d29] border border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all pr-12 text-white placeholder-gray-500"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    required
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#1a1d29] border border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all pr-12 text-white placeholder-gray-500"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
-                  >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Terms Checkbox */}
-            <div className="flex items-center gap-3">
+            {/* Password */}
+            <div className={inputRow}>
+              <Lock size={16} className={iconCls} />
               <input
-                type="checkbox"
-                id="terms"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-700 bg-[#1a1d29] text-primary focus:ring-primary focus:ring-offset-gray-800"
+                type={showPassword ? "text" : "password"}
+                required
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                placeholder="Password"
+                className={inputField}
               />
-              <label htmlFor="terms" className="text-sm text-gray-300">
-                I agree to the{" "}
-                <Link to="/terms" className="text-primary hover:text-orange-600">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link to="/privacy" className="text-primary hover:text-orange-600">
-                  Privacy Policy
-                </Link>
-              </label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={`${iconCls} hover:text-primary transition-colors`}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
 
-            {/* Error Message */}
+            {/* Confirm Password */}
+            <div className={inputRow}>
+              <Lock size={16} className={iconCls} />
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                required
+                value={formData.confirmPassword}
+                onChange={(e) =>
+                  setFormData({ ...formData, confirmPassword: e.target.value })
+                }
+                placeholder="Confirm Password"
+                className={inputField}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className={`${iconCls} hover:text-primary transition-colors`}
+              >
+                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+
+            
+
+            {/* Error */}
             {error && (
-              <div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-2xl text-sm">
                 {error}
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
-              disabled={isLoading || !agreedToTerms}
-              className="w-full bg-primary hover:bg-orange-600 text-white py-3.5 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              disabled={isLoading }
+              className="w-full py-[14px] rounded-full font-bold text-white text-sm tracking-widest uppercase
+                bg-gradient-to-r from-primary to-orange-500
+                shadow-[5px_5px_12px_#b8bec7,-3px_-3px_8px_#ffffff,inset_0_1px_0_rgba(255,255,255,0.15)]
+                hover:shadow-[3px_3px_8px_#b8bec7,-1px_-1px_4px_#ffffff]
+                active:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.25)]
+                dark:shadow-[5px_5px_15px_#12151f,-3px_-3px_8px_#2e3248,inset_0_1px_0_rgba(255,255,255,0.1)]
+                dark:hover:shadow-[3px_3px_10px_#12151f,-1px_-1px_4px_#2e3248]
+                dark:active:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.4)]
+                transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Creating Account..." : "Create Account"}
-              {!isLoading && <ArrowRight size={20} />}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="mt-8 mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-[#252837] text-gray-400">Or sign up with</span>
-              </div>
-            </div>
+          <div className="my-5 flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-300 dark:bg-[#2e3248]" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-300 dark:bg-[#2e3248]" />
           </div>
 
-          {/* Google Sign Up */}
+          {/* Google */}
           <button
             onClick={handleGoogleSignup}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-[#1a1d29] border border-gray-700 rounded-lg hover:bg-[#1f2332] transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-all
+              text-gray-600 dark:text-gray-300
+              bg-[#e0e5ec] shadow-[4px_4px_8px_#b8bec7,-4px_-4px_8px_#ffffff]
+              hover:shadow-[2px_2px_4px_#b8bec7,-2px_-2px_4px_#ffffff]
+              dark:bg-[#1e2130] dark:shadow-[4px_4px_10px_#12151f,-4px_-4px_10px_#2e3248]
+              dark:hover:shadow-[2px_2px_6px_#12151f,-2px_-2px_6px_#2e3248]"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
               <path
                 fill="#EA4335"
-                d="M5.26620003,9.76452941 C6.19878754,6.93863203 8.85444915,4.90909091 12,4.90909091 C13.6909091,4.90909091 15.2181818,5.50909091 16.4181818,6.49090909 L19.9090909,3 C17.7818182,1.14545455 15.0545455,0 12,0 C7.27006974,0 3.1977497,2.69829785 1.23999023,6.65002441 L5.26620003,9.76452941 Z"
+                d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115Z"
               />
               <path
                 fill="#34A853"
-                d="M16.0407269,18.0125889 C14.9509167,18.7163016 13.5660892,19.0909091 12,19.0909091 C8.86648613,19.0909091 6.21911939,17.076871 5.27698177,14.2678769 L1.23746264,17.3349879 C3.19279051,21.2936293 7.26500293,24 12,24 C14.9328362,24 17.7353462,22.9573905 19.834192,20.9995801 L16.0407269,18.0125889 Z"
+                d="M16.04 18.013c-1.09.703-2.474 1.078-4.04 1.078a7.077 7.077 0 0 1-6.723-4.823l-4.04 3.067A11.965 11.965 0 0 0 12 24c2.933 0 5.735-1.043 7.834-3l-3.793-2.987Z"
               />
               <path
                 fill="#4A90E2"
-                d="M19.834192,20.9995801 C22.0291676,18.9520994 23.4545455,15.903663 23.4545455,12 C23.4545455,11.2909091 23.3454545,10.5818182 23.1818182,9.90909091 L12,9.90909091 L12,14.4545455 L18.4363636,14.4545455 C18.1187732,16.013626 17.2662994,17.2212117 16.0407269,18.0125889 L19.834192,20.9995801 Z"
+                d="M19.834 21c2.195-2.048 3.62-5.096 3.62-9 0-.71-.109-1.473-.272-2.182H12v4.637h6.436c-.317 1.559-1.17 2.766-2.395 3.558L19.834 21Z"
               />
               <path
                 fill="#FBBC05"
-                d="M5.27698177,14.2678769 C5.03832634,13.556323 4.90909091,12.7937589 4.90909091,12 C4.90909091,11.2182781 5.03443647,10.4668121 5.26620003,9.76452941 L1.23999023,6.65002441 C0.43658717,8.26043162 0,10.0753848 0,12 C0,13.9195484 0.444780743,15.7301709 1.23746264,17.3349879 L5.27698177,14.2678769 Z"
+                d="M5.277 14.268A7.12 7.12 0 0 1 4.909 12c0-.782.125-1.533.357-2.235L1.24 6.65A11.934 11.934 0 0 0 0 12c0 1.92.445 3.73 1.237 5.335l4.04-3.067Z"
               />
             </svg>
-            <span className="font-medium text-gray-300">Continue with Google</span>
+            Continue with Google
           </button>
 
-          {/* Login Link */}
-          <div className="mt-8 text-center">
-            <p className="text-gray-400">
+          {/* Footer */}
+          <div className="mt-5 text-center text-sm">
+            <span className="text-gray-500 dark:text-gray-400">
               Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:text-orange-600 font-semibold">
-                Sign In
-              </Link>
-            </p>
+            </span>
+            <Link
+              to="/login"
+              className="text-primary hover:text-orange-500 font-semibold transition-colors"
+            >
+              Sign In
+            </Link>
           </div>
         </div>
       </div>

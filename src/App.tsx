@@ -23,10 +23,18 @@ import Dashboard from "./pages/Dashboard";
 import BrandColors from "./pages/BrandColors";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import DashboardLayout from "./components/dashboard/DashboardLayout";
+import DashboardPosts from "./pages/DashboardPosts";
+import DashboardComments from "./pages/DashboardComments";
+import DashboardPlaces from "./pages/DashboardPlaces";
+
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
       <LanguageProvider defaultLanguage="en">
@@ -94,21 +102,22 @@ const App = () => (
 
                 {/* Protected Routes - Subscription Required */}
                 <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute requireSubscription={true}>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard/colors"
-                  element={
-                    <ProtectedRoute requireSubscription={true}>
-                      <BrandColors />
-                    </ProtectedRoute>
-                  }
-                />
+  path="/dashboard"
+  element={
+    <ProtectedRoute requireSubscription={false}>
+      <DashboardLayout />
+    </ProtectedRoute>
+  }
+>
+  {/* ✅ Nested Routes */}
+  <Route index element={<Dashboard />} />
+  <Route path="posts" element={<DashboardPosts />} />
+  <Route path="comments" element={<DashboardComments />} />
+  <Route path="places" element={<DashboardPlaces />} />
+  {/* <Route path="ratings" element={<DashboardRatings />} />
+  <Route path="colors" element={<BrandColors />} />
+  <Route path="settings" element={<DashboardSettings />} /> */}
+</Route>
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -118,6 +127,8 @@ const App = () => (
       </LanguageProvider>
     </QueryClientProvider>
   </Provider>
+  </GoogleOAuthProvider>
+
 );
 
 export default App;
