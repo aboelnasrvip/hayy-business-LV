@@ -123,7 +123,7 @@ const Register = () => {
   return (
     <div
       dir="ltr"
-      className="relative min-h-screen flex items-center justify-center p-6 bg-[#e0e5ec] dark:bg-[#1a1d2e]"
+      className="relative min-h-screen flex items-center justify-center p-6 bg-[#e0e5ec] dark:bg-[#252838]"
     >
       {/* Theme Toggle */}
       <button
