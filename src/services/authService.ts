@@ -133,4 +133,12 @@ export const authAPI = {
     );
     return response.data;
   },
+
+  // Resend Confirmation OTP
+resendConfirmation: async (email: string) => {
+  const response = await axios.post(`${API_BASE_URL}/api/web/auth/resend-confirmation`, { email });
+  return response.data;
+},
+
 };
+
