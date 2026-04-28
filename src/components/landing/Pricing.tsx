@@ -1,8 +1,16 @@
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+const neuCard =
+  "rounded-[1.5rem] bg-[#e8ecf3] shadow-[10px_10px_22px_#adb5c0,-10px_-10px_22px_#ffffff] dark:bg-[#2b2e42] dark:shadow-[8px_8px_18px_#0e1020,-8px_-8px_18px_#343750]";
+const neuCardPop =
+  "rounded-[1.5rem] bg-[#e8ecf3] shadow-[14px_14px_28px_#adb5c0,-14px_-14px_28px_#ffffff] dark:bg-[#2b2e42] dark:shadow-[12px_12px_24px_#0a0d18,-12px_-12px_24px_#383c55]";
+const neuSmall =
+  "bg-[#e0e5ec] shadow-[3px_3px_7px_#b8bec7,-3px_-3px_7px_#ffffff] dark:bg-[#252838] dark:shadow-[3px_3px_6px_#12151f,-3px_-3px_6px_#2e3248]";
+const neuInset =
+  "bg-[#e0e5ec] shadow-[inset_3px_3px_7px_#b8bec7,inset_-3px_-3px_7px_#ffffff] dark:bg-[#252838] dark:shadow-[inset_3px_3px_6px_#12151f,inset_-3px_-3px_6px_#2e3248]";
 
 const Pricing = () => {
   const { t, direction } = useLanguage();
@@ -59,104 +67,117 @@ const Pricing = () => {
     },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
-
   return (
-    <section id="pricing" className="py-24 relative overflow-hidden" dir={direction}>
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <section
+      id="pricing"
+      className="py-24 px-4 bg-[#e0e5ec] dark:bg-[#252838]"
+      dir={direction}
+    >
+      <div className="container mx-auto max-w-6xl">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 rounded-full bg-accent text-accent-foreground text-sm font-medium mb-4">
-            {t("pricing.badge")}
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">
-            {t("pricing.title")}<span className="text-gradient">{t("pricing.titleHighlight")}</span>
+          <div
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-5 ${neuSmall}`}
+          >
+            <Sparkles size={14} className="text-primary" />
+            <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+              {t("pricing.badge")}
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-700 dark:text-white mb-4">
+            {t("pricing.title")}
+            <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
+              {t("pricing.titleHighlight")}
+            </span>
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-base text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
             {t("pricing.subtitle")}
           </p>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto"
-        >
+        {/* Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
           {plans.map((plan, index) => (
             <motion.div
               key={index}
-              variants={cardVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              className={`relative p-8 rounded-3xl border ${
-                plan.popular
-                  ? "bg-gradient-to-b from-card to-accent/20 border-primary shadow-glow"
-                  : "bg-card border-border"
-              } transition-all duration-300`}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ delay: index * 0.12, duration: 0.5 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className={`relative flex flex-col p-7 ${plan.popular ? neuCardPop : neuCard} ${plan.popular ? "md:-mt-4 md:mb-4" : ""}`}
             >
+              {/* Accent top line */}
+              <div
+                className={`absolute top-0 left-6 right-6 h-[3px] rounded-full ${plan.popular ? "bg-gradient-to-r from-primary to-orange-400" : "bg-gray-200/60 dark:bg-white/5"}`}
+              />
+
+              {/* Popular badge */}
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-primary text-primary-foreground text-sm font-medium shadow-glow">
-                    <Sparkles className="w-4 h-4" />
+                  <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-orange-500 text-white text-xs font-bold shadow-[3px_3px_8px_#adb5c0]">
+                    <Sparkles size={11} />
                     {t("pricing.pro.popular")}
                   </div>
                 </div>
               )}
 
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-semibold text-foreground mb-2">{t(plan.nameKey)}</h3>
-                <div className="flex items-baseline justify-center gap-1 mb-3">
-                  <span className="text-4xl font-bold text-foreground">{t(plan.priceKey)}</span>
+              {/* Plan name & price */}
+              <div className="text-center mb-6 mt-2">
+                <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-3">
+                  {t(plan.nameKey)}
+                </h3>
+                <div
+                  className={`inline-flex items-baseline justify-center gap-1 px-6 py-3 rounded-2xl mb-3 ${neuInset}`}
+                >
+                  <span className="text-3xl font-black text-gray-700 dark:text-white">
+                    {t(plan.priceKey)}
+                  </span>
                   {plan.periodKey && (
-                    <span className="text-muted-foreground">{t(plan.periodKey)}</span>
+                    <span className="text-sm text-gray-400">
+                      {t(plan.periodKey)}
+                    </span>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">{t(plan.descKey)}</p>
+                <p className="text-xs text-gray-400">{t(plan.descKey)}</p>
               </div>
 
-              <ul className="space-y-4 mb-8">
+              {/* Features */}
+              <ul className="space-y-3 mb-8 flex-1">
                 {plan.featureKeys.map((fk) => (
                   <li key={fk} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-primary" />
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check size={11} className="text-white" />
                     </div>
-                    <span className="text-sm text-foreground">{t(fk)}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      {t(fk)}
+                    </span>
                   </li>
                 ))}
               </ul>
 
+              {/* CTA */}
               <Link to="/register">
-                <Button
-                  className={`w-full py-6 text-base font-medium rounded-xl ${
-                    plan.popular
-                      ? "bg-gradient-primary hover:opacity-90 shadow-glow"
-                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                  } transition-all`}
+                <button
+                  className={`w-full py-3 rounded-2xl text-sm font-bold transition-all
+                    ${
+                      plan.popular
+                        ? "text-white bg-gradient-to-r from-primary to-orange-500 shadow-[4px_4px_10px_#adb5c0,-2px_-2px_6px_#ffffff] dark:shadow-[4px_4px_10px_#0e1020] hover:opacity-90"
+                        : `text-gray-600 dark:text-gray-300 hover:text-primary ${neuSmall}`
+                    }`}
                 >
                   {t(plan.ctaKey)}
-                </Button>
+                </button>
               </Link>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

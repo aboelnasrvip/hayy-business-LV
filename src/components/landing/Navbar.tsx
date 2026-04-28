@@ -2,10 +2,13 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
-import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
+
+const neuNav =
+  "bg-[#e0e5ec] shadow-[8px_8px_18px_#b8bec7,-8px_-8px_18px_#ffffff] dark:bg-[#252838] dark:shadow-[6px_6px_16px_#12151f,-6px_-6px_16px_#2e3248]";
+const neuBtn =
+  "bg-[#e0e5ec] shadow-[3px_3px_7px_#b8bec7,-3px_-3px_7px_#ffffff] dark:bg-[#252838] dark:shadow-[3px_3px_6px_#12151f,-3px_-3px_6px_#2e3248]";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,95 +22,90 @@ const Navbar = () => {
   ];
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 glass-strong"
-      // dir={direction}
+    <div
+      className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4"
+      dir={direction}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+      <motion.div
+        initial={{ y: -80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className={`w-full max-w-4xl rounded-[2rem] px-5 py-3 ${neuNav}`}
+      >
+        <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2"
+            <div
+              className={`w-9 h-9 rounded-xl flex items-center justify-center ${neuBtn}`}
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
-                <span className="text-primary-foreground font-bold text-xl">H</span>
-              </div>
-              <span className="text-2xl font-bold text-foreground">HAYY</span>
-            </motion.div>
+              <span className="text-primary font-black text-base">H</span>
+            </div>
+            <span className="font-black text-lg text-gray-700 dark:text-white">
+              HAYY
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
-              <motion.a
+              <a
                 key={item.name}
                 href={item.href}
-                whileHover={{ scale: 1.05 }}
-                className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                className="px-4 py-2 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
               >
                 {item.name}
-              </motion.a>
+              </a>
             ))}
           </div>
 
-          {/* Right Side Actions */}
+          {/* Right side */}
           <div className="hidden md:flex items-center gap-2">
-            {/* <LanguageSwitcher /> */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+            <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all ${neuBtn}`}
             >
               {theme === "dark" ? (
-                <Sun className="w-5 h-5 text-foreground" />
+                <Sun size={16} className="text-primary" />
               ) : (
-                <Moon className="w-5 h-5 text-foreground" />
+                <Moon size={16} className="text-gray-500" />
               )}
-            </motion.button>
+            </button>
             <Link to="/login">
-              <Button variant="ghost" className="font-medium">
+              <button
+                className={`px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 transition-all ${neuBtn}`}
+              >
                 {t("nav.signIn")}
-              </Button>
+              </button>
             </Link>
             <Link to="/register">
-              <Button className="bg-gradient-primary hover:opacity-90 transition-opacity font-medium shadow-glow">
+              <button className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-primary to-orange-500 shadow-[3px_3px_8px_#b8bec7,-1px_-1px_4px_#ffffff] dark:shadow-[3px_3px_8px_#12151f] hover:opacity-90 transition-all">
                 {t("nav.getStarted")}
-              </Button>
+              </button>
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile */}
           <div className="md:hidden flex items-center gap-2">
-            <LanguageSwitcher />
-            <motion.button
-              whileTap={{ scale: 0.9 }}
+            <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              className={`w-9 h-9 flex items-center justify-center rounded-xl ${neuBtn}`}
             >
               {theme === "dark" ? (
-                <Sun className="w-5 h-5 text-foreground" />
+                <Sun size={16} className="text-primary" />
               ) : (
-                <Moon className="w-5 h-5 text-foreground" />
+                <Moon size={16} className="text-gray-500" />
               )}
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.9 }}
+            </button>
+            <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              className={`w-9 h-9 flex items-center justify-center rounded-xl ${neuBtn}`}
             >
               {isOpen ? (
-                <X className="w-6 h-6 text-foreground" />
+                <X size={18} className="text-gray-600 dark:text-gray-300" />
               ) : (
-                <Menu className="w-6 h-6 text-foreground" />
+                <Menu size={18} className="text-gray-600 dark:text-gray-300" />
               )}
-            </motion.button>
+            </button>
           </div>
         </div>
 
@@ -118,41 +116,48 @@ const Navbar = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden overflow-hidden"
+              transition={{ duration: 0.25 }}
+              className="md:hidden overflow-hidden mt-3 pt-3 border-t border-gray-200/50 dark:border-white/5"
             >
-              <div className="py-4 space-y-4">
-                {navItems.map((item, index) => (
-                  <motion.a
+              <div className="flex flex-col gap-1 pb-1">
+                {navItems.map((item) => (
+                  <a
                     key={item.name}
                     href={item.href}
-                    initial={{ opacity: 0, x: direction === "rtl" ? 20 : -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="block text-muted-foreground hover:text-foreground transition-colors font-medium py-2"
                     onClick={() => setIsOpen(false)}
+                    className="px-4 py-3 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary transition-colors"
                   >
                     {item.name}
-                  </motion.a>
+                  </a>
                 ))}
-                <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                  <Link to="/login" onClick={() => setIsOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-center">
+                <div className="flex gap-2 pt-2">
+                  <Link
+                    to="/login"
+                    className="flex-1"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <button
+                      className={`w-full py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300 ${neuBtn}`}
+                    >
                       {t("nav.signIn")}
-                    </Button>
+                    </button>
                   </Link>
-                  <Link to="/register" onClick={() => setIsOpen(false)}>
-                    <Button className="w-full bg-gradient-primary hover:opacity-90">
+                  <Link
+                    to="/register"
+                    className="flex-1"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <button className="w-full py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 transition-all">
                       {t("nav.getStarted")}
-                    </Button>
+                    </button>
                   </Link>
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-    </motion.nav>
+      </motion.div>
+    </div>
   );
 };
 
