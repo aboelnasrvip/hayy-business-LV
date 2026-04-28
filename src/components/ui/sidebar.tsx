@@ -1,324 +1,302 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, MessageSquare, Star, Palette,
-  Settings, LogOut, Bell, Sun, Moon, ChevronDown,
-  TrendingUp, Sparkles,
+  LayoutDashboard,
+  FileText,
+  MessageSquare,
+  Star,
+  Palette,
+  Settings,
+  LogOut,
+  Menu,
+  Bell,
+  Sun,
+  Moon,
+  MapPin,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarRail,
-  SidebarSeparator,
-  SidebarTrigger,
-  useSidebar,
-} from "@/components/ui/sidebar";
-
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-interface DashboardLayoutProps {
-  children: React.ReactNode;
-}
-
-// ─── Menu config ─────────────────────────────────────────────────────────────
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { logout } from "@/store/slices/authSlice";
 
 const menuItems = [
-  { icon: LayoutDashboard, labelKey: "sidebar.dashboard",   path: "/dashboard",         group: "main" },
-  { icon: FileText,        labelKey: "sidebar.posts",       path: "/dashboard/posts",   group: "main" },
-  { icon: MessageSquare,   labelKey: "sidebar.comments",    path: "/dashboard/comments",group: "main" },
-  { icon: Star,            labelKey: "sidebar.ratings",     path: "/dashboard/ratings", group: "main" },
-  { icon: Palette,         labelKey: "sidebar.brandColors", path: "/dashboard/colors",  group: "settings" },
-  { icon: Settings,        labelKey: "sidebar.settings",    path: "/dashboard/settings",group: "settings" },
+  { icon: LayoutDashboard, labelKey: "sidebar.dashboard", path: "/dashboard" },
+  { icon: MapPin, labelKey: "sidebar.places", path: "/dashboard/places" },
+  { icon: FileText, labelKey: "sidebar.posts", path: "/dashboard/posts" },
+  {
+    icon: MessageSquare,
+    labelKey: "sidebar.comments",
+    path: "/dashboard/comments",
+  },
+  { icon: Star, labelKey: "sidebar.ratings", path: "/dashboard/ratings" },
+  { icon: Palette, labelKey: "sidebar.brandColors", path: "/dashboard/colors" },
+  { icon: Settings, labelKey: "sidebar.settings", path: "/dashboard/settings" },
 ];
 
-// ─── Inner Sidebar component (needs useSidebar context) ──────────────────────
+// shared neumorphic tokens
+const neuRaised =
+  "bg-[#e0e5ec] shadow-[5px_5px_12px_#b8bec7,-5px_-5px_12px_#ffffff] dark:bg-[#252838] dark:shadow-[4px_4px_10px_#12151f,-4px_-4px_10px_#2e3248]";
+const neuSmall =
+  "bg-[#e0e5ec] shadow-[3px_3px_7px_#b8bec7,-3px_-3px_7px_#ffffff] dark:bg-[#252838] dark:shadow-[3px_3px_6px_#12151f,-3px_-3px_6px_#2e3248]";
 
-const AppSidebar = () => {
-  const location   = useLocation();
+const DashboardLayout = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { theme, setTheme } = useTheme();
   const { t, direction } = useLanguage();
-  const { state }  = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const user = useAppSelector((s) => s.auth.user);
 
   const isActive = (path: string) => location.pathname === path;
+  const handleLogout = async () => {
+    await dispatch(logout());
+    navigate("/login");
+  };
+  const pageTitle = menuItems.find((item) => isActive(item.path));
 
-  const mainItems     = menuItems.filter((i) => i.group === "main");
-  const settingsItems = menuItems.filter((i) => i.group === "settings");
+  // JSX helper – renders sidebar body
+  const sidebarBody = (showLabels: boolean, onClose?: () => void) => (
+    <div
+      className={`flex flex-col h-full py-5 gap-2 bg-[#e0e5ec] dark:bg-[#252838]
+        ${showLabels ? "px-4 w-[230px]" : "px-3 w-[76px] items-center"}`}
+    >
+      {/* ── Logo / Collapse button ── */}
+      <div
+        className={`flex items-center mb-3 ${showLabels ? "justify-between px-1" : "justify-center"}`}
+      >
+        {showLabels ? (
+          <>
+            <Link to="/" className="flex items-center gap-2">
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center ${neuRaised}`}
+              >
+                <img
+                  src="/logo.png"
+                  className="w-7 h-7 object-contain rounded-full"
+                  alt="Logo"
+                />
+              </div>
+              <span className="font-black text-lg text-gray-700 dark:text-white tracking-wide">
+                HAYY
+              </span>
+            </Link>
+            {/* collapse arrow (desktop only) */}
+            <button
+              onClick={() => setCollapsed(true)}
+              className={`hidden lg:flex w-8 h-8 items-center justify-center rounded-lg transition-all hover:text-primary ${neuSmall}`}
+            >
+              {direction === "rtl" ? (
+                <ChevronRight
+                  size={15}
+                  className="text-gray-500 dark:text-gray-400"
+                />
+              ) : (
+                <ChevronLeft
+                  size={15}
+                  className="text-gray-500 dark:text-gray-400"
+                />
+              )}
+            </button>
+          </>
+        ) : (
+          /* collapsed: logo acts as expand button */
+          <button
+            onClick={() => setCollapsed(false)}
+            className={`w-12 h-12 flex items-center justify-center rounded-xl transition-all hover:text-primary ${neuRaised}`}
+          >
+            <img
+              src="/logo.png"
+              className="w-7 h-7 object-contain rounded-full"
+              alt="Logo"
+            />
+          </button>
+        )}
+      </div>
+
+      {/* ── Avatar card (expanded only) ── */}
+      {showLabels && (
+        <div
+          className={`flex flex-col items-center gap-2 py-4 px-3 rounded-2xl mb-2 ${neuRaised}`}
+        >
+          <div
+            className={`w-14 h-14 rounded-full flex items-center justify-center ${neuSmall}`}
+          >
+            <span className="text-2xl font-black text-primary">
+              {user?.fullName?.[0]?.toUpperCase() ?? "A"}
+            </span>
+          </div>
+          <p className="font-bold text-sm text-gray-700 dark:text-white leading-none">
+            {user?.fullName ?? t("dashboard.businessName")}
+          </p>
+          {user?.email && (
+            <p className="text-[11px] text-gray-400 truncate max-w-[170px]">
+              {user.email}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* ── Menu ── */}
+      <nav className="flex-1 flex flex-col gap-2 w-full">
+        {menuItems.map((item) => {
+          const active = isActive(item.path);
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={onClose}
+              title={!showLabels ? t(item.labelKey) : undefined}
+            >
+              <div
+                className={`flex items-center rounded-xl transition-all duration-200
+                  ${showLabels ? "gap-3 px-4 py-3" : "justify-center w-12 h-12 mx-auto"}
+                  ${
+                    active
+                      ? "bg-gradient-to-r from-primary to-orange-500 text-white shadow-[3px_3px_8px_#b8bec7,-1px_-1px_5px_#ffffff] dark:shadow-[3px_3px_8px_#12151f,-1px_-1px_4px_#2e3248]"
+                      : `text-gray-500 dark:text-gray-400 hover:text-primary ${neuSmall}`
+                  }`}
+              >
+                <item.icon size={19} className="shrink-0" />
+                {showLabels && (
+                  <span className="font-medium text-sm">
+                    {t(item.labelKey)}
+                  </span>
+                )}
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* ── Logout ── */}
+      <button
+        onClick={handleLogout}
+        title={!showLabels ? t("dashboard.signOut") : undefined}
+        className={`flex items-center rounded-xl transition-all duration-200 text-red-400 hover:text-red-500
+          ${showLabels ? "gap-3 px-4 py-3 w-full" : "justify-center w-12 h-12 mx-auto"}
+          ${neuSmall}`}
+      >
+        <LogOut size={19} className="shrink-0" />
+        {showLabels && (
+          <span className="font-medium text-sm">{t("dashboard.signOut")}</span>
+        )}
+      </button>
+    </div>
+  );
 
   return (
-    <Sidebar collapsible="icon" side={direction === "rtl" ? "right" : "left"}>
-      {/* ── Logo ── */}
-      <SidebarHeader className="h-16 border-b border-sidebar-border px-3 justify-center">
-        <Link to="/" className="flex items-center gap-3 overflow-hidden">
-          {/* Logo mark */}
-          <div className="relative flex-shrink-0 w-9 h-9">
-            <div className="absolute inset-0 rounded-xl bg-gradient-primary shadow-glow opacity-90" />
-            <div className="absolute inset-0 rounded-xl flex items-center justify-center">
-              <span className="text-primary-foreground font-black text-lg leading-none">H</span>
+    <div
+      className="min-h-screen flex bg-[#e0e5ec] dark:bg-[#252838]"
+      dir={direction}
+    >
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileOpen(false)}
+            className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Sidebar Drawer */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.aside
+            initial={{ x: direction === "rtl" ? "100%" : "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: direction === "rtl" ? "100%" : "-100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className={`fixed top-0 z-50 h-full overflow-hidden
+              ${direction === "rtl" ? "right-0 rounded-s-[2rem]" : "left-0 rounded-e-[2rem]"}
+              shadow-[8px_0_24px_rgba(0,0,0,0.08)] dark:shadow-[8px_0_24px_rgba(0,0,0,0.3)]`}
+          >
+            {sidebarBody(true, () => setMobileOpen(false))}
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Sidebar */}
+      <motion.aside
+        animate={{ width: collapsed ? 76 : 230 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className={`hidden lg:flex flex-col sticky top-0 h-screen overflow-hidden
+          ${direction === "rtl" ? "rounded-s-0 rounded-e-[2rem]" : "rounded-e-[2rem]"}
+          shadow-[6px_0_20px_rgba(0,0,0,0.05)] dark:shadow-[6px_0_20px_rgba(0,0,0,0.25)]`}
+      >
+        {sidebarBody(!collapsed)}
+      </motion.aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        {/* Navbar */}
+        <header
+          className="sticky top-0 z-30 mx-4 mt-4 px-4 py-2.5 rounded-2xl flex items-center justify-between
+          bg-[#e0e5ec] shadow-[6px_6px_14px_#b8bec7,-6px_-6px_14px_#ffffff]
+          dark:bg-[#252838] dark:shadow-[5px_5px_12px_#12151f,-5px_-5px_12px_#2e3248]"
+        >
+          <div className="flex items-center gap-3">
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className={`lg:hidden w-9 h-9 flex items-center justify-center rounded-xl ${neuSmall}`}
+            >
+              <Menu size={18} className="text-gray-600 dark:text-gray-400" />
+            </button>
+            <h1 className="font-bold text-gray-700 dark:text-white">
+              {pageTitle ? t(pageTitle.labelKey) : t("sidebar.dashboard")}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+
+            {/* Theme toggle */}
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all
+                hover:shadow-[1px_1px_3px_#b8bec7,-1px_-1px_3px_#ffffff]
+                dark:hover:shadow-[1px_1px_3px_#12151f,-1px_-1px_3px_#2e3248] ${neuSmall}`}
+            >
+              {theme === "dark" ? (
+                <Sun size={17} className="text-primary" />
+              ) : (
+                <Moon size={17} className="text-gray-500" />
+              )}
+            </button>
+
+            {/* Notifications */}
+            <button
+              className={`relative w-9 h-9 flex items-center justify-center rounded-xl ${neuSmall}`}
+            >
+              <Bell size={17} className="text-gray-600 dark:text-gray-400" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-[#e0e5ec] dark:ring-[#252838]" />
+            </button>
+
+            {/* Avatar */}
+            <div
+              className={`w-9 h-9 rounded-full flex items-center justify-center ${neuSmall}`}
+            >
+              <span className="font-bold text-sm text-primary">
+                {user?.fullName?.[0]?.toUpperCase() ?? "A"}
+              </span>
             </div>
           </div>
-          <AnimatePresence>
-            {!isCollapsed && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <div className="flex flex-col leading-none">
-                  <span className="text-sidebar-foreground font-black text-lg tracking-wide">HAYY</span>
-                  <span className="text-muted-foreground text-[10px] font-medium tracking-widest uppercase">Platform</span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Link>
-      </SidebarHeader>
+        </header>
 
-      <SidebarContent className="py-3">
-
-        {/* ── Main Group ── */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/60 mb-1">
-              {t("sidebar.dashboard")}
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.path)}
-                    tooltip={t(item.labelKey)}
-                    size="lg"
-                    className={`rounded-xl transition-all duration-200 ${
-                      isActive(item.path)
-                        ? "bg-gradient-primary text-primary-foreground shadow-glow hover:opacity-90"
-                        : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    }`}
-                  >
-                    <Link to={item.path}>
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="font-medium">{t(item.labelKey)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        {/* ── Settings Group ── */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground/60 mb-1">
-              {t("sidebar.settings")}
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.path)}
-                    tooltip={t(item.labelKey)}
-                    size="lg"
-                    className={`rounded-xl transition-all duration-200 ${
-                      isActive(item.path)
-                        ? "bg-gradient-primary text-primary-foreground shadow-glow hover:opacity-90"
-                        : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    }`}
-                  >
-                    <Link to={item.path}>
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="font-medium">{t(item.labelKey)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* ── Pro Banner (visible when expanded) ── */}
-        <AnimatePresence>
-          {!isCollapsed && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.2 }}
-              className="mx-3 mt-4"
-            >
-              <div className="relative rounded-2xl bg-gradient-primary p-4 overflow-hidden">
-                {/* decorative circles */}
-                <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-white/10" />
-                <div className="absolute -bottom-3 -left-3 w-12 h-12 rounded-full bg-white/10" />
-                <Sparkles className="w-5 h-5 text-white/90 mb-2" />
-                <p className="text-white font-semibold text-sm leading-tight">Upgrade to Pro</p>
-                <p className="text-white/70 text-xs mt-0.5 mb-3">Unlock advanced analytics &amp; AI tools</p>
-                <button className="w-full bg-white text-primary text-xs font-bold py-1.5 rounded-lg hover:bg-white/90 transition-colors flex items-center justify-center gap-1">
-                  <TrendingUp className="w-3.5 h-3.5" /> Upgrade Now
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </SidebarContent>
-
-      {/* ── Footer: User Profile + Logout ── */}
-      <SidebarFooter className="border-t border-sidebar-border p-3">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              tooltip={t("dashboard.businessName")}
-              className="rounded-xl hover:bg-sidebar-accent transition-all duration-200"
-            >
-              <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center flex-shrink-0 shadow-glow">
-                <span className="text-primary-foreground font-bold text-sm">A</span>
-              </div>
-              <div className="flex-1 min-w-0 text-start">
-                <p className="font-semibold text-sidebar-foreground text-sm truncate">{t("dashboard.businessName")}</p>
-                <p className="text-muted-foreground text-xs truncate">{t("dashboard.proPlan")}</p>
-              </div>
-              <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              tooltip={t("dashboard.signOut")}
-              className="rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
-            >
-              <LogOut className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium">{t("dashboard.signOut")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-
-      <SidebarRail />
-    </Sidebar>
-  );
-};
-
-// ─── Header ──────────────────────────────────────────────────────────────────
-
-const AppHeader = () => {
-  const location   = useLocation();
-  const { theme, setTheme } = useTheme();
-  const { t }      = useLanguage();
-  const [hasNotif, setHasNotif] = useState(true);
-
-  const activeItem = menuItems.find((item) => location.pathname === item.path);
-  const pageTitle  = activeItem ? t(activeItem.labelKey) : t("sidebar.dashboard");
-
-  return (
-    <header className="sticky top-0 z-30 h-16 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 lg:px-6">
-      <div className="flex items-center gap-3">
-        {/* shadcn trigger — handles mobile & desktop collapse */}
-        <SidebarTrigger className="text-foreground hover:bg-secondary rounded-lg w-9 h-9" />
-
-        {/* Breadcrumb-style title */}
-        <div className="hidden sm:flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">HAYY</span>
-          <span className="text-muted-foreground/40">/</span>
-          <span className="font-semibold text-foreground">{pageTitle}</span>
-        </div>
+        <main className="flex-1 p-4 lg:p-6">
+          <Outlet />
+        </main>
       </div>
-
-      <div className="flex items-center gap-1.5">
-        <LanguageSwitcher />
-
-        {/* Theme Toggle */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="w-9 h-9 flex items-center justify-center hover:bg-secondary rounded-lg transition-colors"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={theme}
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              {theme === "dark"
-                ? <Sun  className="w-4.5 h-4.5 text-foreground" />
-                : <Moon className="w-4.5 h-4.5 text-foreground" />}
-            </motion.div>
-          </AnimatePresence>
-        </motion.button>
-
-        {/* Notifications */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setHasNotif(false)}
-          className="relative w-9 h-9 flex items-center justify-center hover:bg-secondary rounded-lg transition-colors"
-        >
-          <Bell className="w-4.5 h-4.5 text-foreground" />
-          <AnimatePresence>
-            {hasNotif && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-background"
-              />
-            )}
-          </AnimatePresence>
-        </motion.button>
-
-        {/* Avatar */}
-        <div className="hidden sm:flex w-8 h-8 rounded-full bg-gradient-primary items-center justify-center ms-1 shadow-glow cursor-pointer">
-          <span className="text-primary-foreground font-bold text-sm">A</span>
-        </div>
-      </div>
-    </header>
-  );
-};
-
-// ─── Layout Root ─────────────────────────────────────────────────────────────
-
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { direction } = useLanguage();
-
-  return (
-    <div dir={direction} className="min-h-screen bg-background">
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <AppHeader />
-          <main className="flex-1 p-4 lg:p-6">
-            {children}
-          </main>
-        </SidebarInset>
-      </SidebarProvider>
     </div>
   );
 };
