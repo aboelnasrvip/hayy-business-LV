@@ -183,8 +183,8 @@ const Login = () => {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 placeholder="password"
-                className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left"
-              />
+                className="flex-1 min-w-0 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left"/>
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
