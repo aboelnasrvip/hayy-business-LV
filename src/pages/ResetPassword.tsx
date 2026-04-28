@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Lock, Eye, EyeOff, Loader, Sun, Moon, KeyRound } from "lucide-react";
+import { Lock, Eye, EyeOff, Loader, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
 import { authAPI } from "@/services/authService";
 import { useTheme } from "@/components/ui/ThemeProvider";
@@ -11,6 +11,7 @@ const ResetPassword = () => {
   const { theme, setTheme } = useTheme();
 
   const email = searchParams.get("email") || "";
+  const token = searchParams.get("token") || "";
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,44 +21,31 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
+    if (password !== confirmPassword) { toast.error("Passwords do not match"); return; }
+    if (password.length < 8) { toast.error("Password must be at least 8 characters"); return; }
 
     setIsLoading(true);
     try {
-      await authAPI.resetPassword({
-        email,
-        password,
-        confirmPassword,
-      });
+      await authAPI.resetPassword({ email, token, password, confirmPassword });
       toast.success("Password reset successfully!");
       navigate("/login");
     } catch (error: any) {
       toast.error(
         error.response?.data?.error ||
-          error.response?.data?.title ||
-          error.response?.data?.message ||
-          "Failed to reset password",
+        error.response?.data?.title ||
+        error.response?.data?.message ||
+        "Failed to reset password"
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const neuInput =
-    "flex items-center gap-3 px-5 py-3.5 rounded-full bg-[#e0e5ec] shadow-[inset_5px_5px_10px_#b8bec7,inset_-5px_-5px_10px_#ffffff] dark:bg-[#252838] dark:shadow-[inset_4px_4px_10px_#12151f,inset_-2px_-2px_6px_#2e3248]";
+  const neuInput = "flex items-center gap-3 px-5 py-3.5 rounded-full bg-[#e0e5ec] shadow-[inset_5px_5px_10px_#b8bec7,inset_-5px_-5px_10px_#ffffff] dark:bg-[#252838] dark:shadow-[inset_4px_4px_10px_#12151f,inset_-2px_-2px_6px_#2e3248]";
 
   return (
-    <div
-      dir="ltr"
-      className="relative min-h-screen flex items-center justify-center p-6 bg-[#e0e5ec] dark:bg-[#252838]"
-    >
+    <div dir="ltr" className="relative min-h-screen flex items-center justify-center p-6 bg-[#e0e5ec] dark:bg-[#252838]">
+
       {/* Theme Toggle */}
       <button
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -66,51 +54,35 @@ const ResetPassword = () => {
           hover:shadow-[2px_2px_4px_#b8bec7,-2px_-2px_4px_#ffffff]
           dark:bg-[#252838] dark:shadow-[3px_3px_7px_#12151f,-3px_-3px_7px_#2e3248]"
       >
-        {theme === "dark" ? (
-          <Sun size={18} className="text-primary" />
-        ) : (
-          <Moon size={18} className="text-gray-500" />
-        )}
+        {theme === "dark" ? <Sun size={18} className="text-primary" /> : <Moon size={18} className="text-gray-500" />}
       </button>
 
       <div className="w-full max-w-[380px]">
-        <div
-          className="rounded-[2rem] p-8
+        {/* Card */}
+        <div className="rounded-[2rem] p-8
           bg-[#e0e5ec] shadow-[10px_10px_20px_#b8bec7,-10px_-10px_20px_#ffffff]
-          dark:bg-[#252838] dark:shadow-[8px_8px_20px_#12151f,-8px_-8px_20px_#2e3248]"
-        >
+          dark:bg-[#252838] dark:shadow-[8px_8px_20px_#12151f,-8px_-8px_20px_#2e3248]">
+
           {/* Logo */}
           <div className="flex justify-center mb-5">
-            <div
-              className="w-[76px] h-[76px] rounded-full flex items-center justify-center
+            <div className="w-[76px] h-[76px] rounded-full flex items-center justify-center
               bg-[#e0e5ec] shadow-[5px_5px_12px_#b8bec7,-5px_-5px_12px_#ffffff]
-              dark:bg-[#2e3248] dark:shadow-[4px_4px_10px_#12151f,-4px_-4px_10px_#343751]"
-            >
-              <img
-                src="/logo.png"
-                alt="Hayy Logo"
-                className="w-14 h-14 object-contain rounded-full"
-              />
+              dark:bg-[#2e3248] dark:shadow-[4px_4px_10px_#12151f,-4px_-4px_10px_#343751]">
+              <img src="/logo.png" alt="Hayy Logo" className="w-14 h-14 object-contain rounded-full" />
             </div>
           </div>
 
           {/* Title */}
           <div className="text-center mb-7">
-            <h1 className="text-xl font-bold text-gray-700 dark:text-white tracking-wide">
-              Reset Password
-            </h1>
-            
+            <h1 className="text-xl font-bold text-gray-700 dark:text-white tracking-wide">Reset Password</h1>
+            <p className="text-gray-400 text-sm mt-1">Enter your new password</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            
 
             {/* New Password */}
             <div dir="ltr" className={neuInput}>
-              <Lock
-                size={17}
-                className="text-gray-400 dark:text-gray-500 shrink-0"
-              />
+              <Lock size={17} className="text-gray-400 dark:text-gray-500 shrink-0" />
               <input
                 type={showPassword ? "text" : "password"}
                 required
@@ -131,10 +103,7 @@ const ResetPassword = () => {
 
             {/* Confirm Password */}
             <div dir="ltr" className={neuInput}>
-              <Lock
-                size={17}
-                className="text-gray-400 dark:text-gray-500 shrink-0"
-              />
+              <Lock size={17} className="text-gray-400 dark:text-gray-500 shrink-0" />
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 required
@@ -168,21 +137,13 @@ const ResetPassword = () => {
                 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
                 flex items-center justify-center gap-2"
             >
-              {isLoading ? (
-                <>
-                  <Loader className="animate-spin" size={18} /> Resetting...
-                </>
-              ) : (
-                "Reset Password"
-              )}
+              {isLoading ? <><Loader className="animate-spin" size={18} /> Resetting...</> : "Reset Password"}
             </button>
           </form>
 
+          {/* Footer */}
           <div className="mt-6 text-center text-sm">
-            <Link
-              to="/login"
-              className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
-            >
+            <Link to="/login" className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors">
               Back to Login
             </Link>
           </div>
