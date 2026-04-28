@@ -273,7 +273,7 @@ const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            {/* <LanguageSwitcher /> */}
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className={`w-9 h-9 flex items-center justify-center rounded-xl ${neuSmall}`}
