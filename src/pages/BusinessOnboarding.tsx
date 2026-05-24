@@ -83,7 +83,7 @@ const BusinessOnboarding = () => {
     try {
       await dispatch(submitOnboarding(data)).unwrap();
       toast.success("Documents submitted successfully!");
-      navigate("/onboarding/pending");
+      navigate("business/onboarding/pending"); 
     } catch (err: any) {
       toast.error(err || "Submission failed");
     }
