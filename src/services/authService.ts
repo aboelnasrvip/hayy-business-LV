@@ -25,6 +25,7 @@ export interface LoginResponse {
   refreshTokenExpirationDateTime: string;
   userType: string;
   verificationStatus: string;
+  hasActiveSubscription: boolean;
 }
 
 export interface RefreshTokenResponse {

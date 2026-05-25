@@ -24,6 +24,7 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   verificationStatus: string | null;
+  hasActiveSubscription: boolean;
 }
 
 const initialState: AuthState = {
@@ -36,6 +37,8 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   verificationStatus: localStorage.getItem("verificationStatus"),
+  hasActiveSubscription: localStorage.getItem('hasActiveSubscription') === 'true',
+
 };
 
 // Login Thunk
@@ -139,6 +142,8 @@ const authSlice = createSlice({
           action.payload.refreshTokenExpirationDateTime;
         state.isAuthenticated = true;
         state.verificationStatus = action.payload.verificationStatus;
+        state.hasActiveSubscription = action.payload.hasActiveSubscription;
+localStorage.setItem('hasActiveSubscription', String(action.payload.hasActiveSubscription));
 
         // ✅ استخدام الـ ID مباشرة من الـ Response
         state.user = {
@@ -180,6 +185,8 @@ const authSlice = createSlice({
           action.payload.refreshTokenExpirationDateTime;
         state.isAuthenticated = true;
         state.verificationStatus = action.payload.verificationStatus;
+        state.hasActiveSubscription = action.payload.hasActiveSubscription;
+localStorage.setItem('hasActiveSubscription', String(action.payload.hasActiveSubscription));
         state.user = {
           id: action.payload.id,
           fullName: action.payload.personName,
@@ -228,6 +235,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.verificationStatus = null;
         state.error = null;
+        state.hasActiveSubscription = false;
       });
   },
 });

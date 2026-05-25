@@ -20,7 +20,6 @@ import SubscriptionPlans from "./pages/SubscriptionPlans";
 import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Dashboard from "./pages/Dashboard";
-import BrandColors from "./pages/BrandColors";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
@@ -104,7 +103,7 @@ const App = () => (
                 <Route
   path="/dashboard"
   element={
-    <ProtectedRoute requireSubscription={false}>
+    <ProtectedRoute >
       <DashboardLayout />
     </ProtectedRoute>
   }
