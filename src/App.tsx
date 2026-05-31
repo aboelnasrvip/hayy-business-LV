@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { Provider } from 'react-redux';
-import { store } from '@/store/store';
+import { Provider } from "react-redux";
+import { store } from "@/store/store";
 import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -33,101 +33,97 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <LanguageProvider defaultLanguage="en">
+          <ThemeProvider defaultTheme="light" storageKey="hayy-theme">
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/verify-email" element={<VerifyEmail />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
 
-  <Provider store={store}>
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider defaultLanguage="en">
-        <ThemeProvider defaultTheme="light" storageKey="hayy-theme">
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/verify-email" element={<VerifyEmail />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                
-                {/* Protected Routes - No Subscription Required */}
-                <Route
-                  path="/profile-setup"
-                  element={
-                    <ProtectedRoute>
-                      <ProfileSetup />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/business/onboarding"
-                  element={
-                      <BusinessOnboarding />
-                  }
-                />
-                <Route
-                  path="/onboarding/pending"
-                  element={
-                    <ProtectedRoute>
-                      <OnboardingPending />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/subscription-plans"
-                  element={
-                    <ProtectedRoute>
-                      <SubscriptionPlans />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/payment"
-                  element={
-                    <ProtectedRoute>
-                      <Payment />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/payment/success"
-                  element={
-                    <ProtectedRoute>
-                      <PaymentSuccess />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Protected Routes - No Subscription Required */}
+                  <Route
+                    path="/profile-setup"
+                    element={
+                      <ProtectedRoute>
+                        <ProfileSetup />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/business/onboarding"
+                    element={<BusinessOnboarding />}
+                  />
+                  <Route
+                    path="/onboarding/pending"
+                    element={
+                      <ProtectedRoute>
+                        <OnboardingPending />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/subscription-plans"
+                    element={
+                      <ProtectedRoute>
+                        <SubscriptionPlans />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/payment"
+                    element={
+                      <ProtectedRoute>
+                        <Payment />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/payment/success"
+                    element={
+                      <ProtectedRoute>
+                        <PaymentSuccess />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Protected Routes - Subscription Required */}
-                <Route
-  path="/dashboard"
-  element={
-    <ProtectedRoute >
-      <DashboardLayout />
-    </ProtectedRoute>
-  }
->
-  {/* ✅ Nested Routes */}
-  <Route index element={<Dashboard />} />
-  <Route path="posts" element={<DashboardPosts />} />
-  <Route path="comments" element={<DashboardComments />} />
-  <Route path="places" element={<DashboardPlaces />} />
-  {/* <Route path="ratings" element={<DashboardRatings />} />
+                  {/* Protected Routes - Subscription Required */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <DashboardLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    {/* ✅ Nested Routes */}
+                    <Route index element={<Dashboard />} />
+                    <Route path="posts" element={<DashboardPosts />} />
+                    <Route path="comments" element={<DashboardComments />} />
+                    <Route path="places" element={<DashboardPlaces />} />
+                    {/* <Route path="ratings" element={<DashboardRatings />} />
   <Route path="colors" element={<BrandColors />} />
   <Route path="settings" element={<DashboardSettings />} /> */}
-</Route>
+                  </Route>
 
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ThemeProvider>
-      </LanguageProvider>
-    </QueryClientProvider>
-  </Provider>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </ThemeProvider>
+        </LanguageProvider>
+      </QueryClientProvider>
+    </Provider>
   </GoogleOAuthProvider>
-
 );
 
 export default App;

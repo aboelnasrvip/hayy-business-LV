@@ -26,6 +26,7 @@ export interface LoginResponse {
   userType: string;
   verificationStatus: string;
   hasActiveSubscription: boolean;
+  businessId: string;
 }
 
 export interface RefreshTokenResponse {

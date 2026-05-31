@@ -12,6 +12,7 @@ interface User {
   email: string;
   userType?: string;
   isEmailConfirmed?: boolean;
+  businessId?: string;
 }
 
 interface AuthState {
@@ -25,11 +26,13 @@ interface AuthState {
   error: string | null;
   verificationStatus: string | null;
   hasActiveSubscription: boolean;
+  businessId: string | null;
 }
 
 const initialState: AuthState = {
   user: JSON.parse(localStorage.getItem("user") || "null"),
   token: localStorage.getItem("token"),
+  businessId: localStorage.getItem('businessId'),
   refreshToken: localStorage.getItem("refreshToken"),
   tokenExpiration: localStorage.getItem("tokenExpiration"),
   refreshTokenExpiration: localStorage.getItem("refreshTokenExpiration"),
@@ -152,7 +155,9 @@ localStorage.setItem('hasActiveSubscription', String(action.payload.hasActiveSub
           email: action.payload.email,
           userType: action.payload.userType,
           isEmailConfirmed: true,
+          businessId: action.payload.businessId,
         };
+        localStorage.setItem('businessId', action.payload.businessId);
 
         localStorage.setItem("user", JSON.stringify(state.user));
         localStorage.setItem("token", action.payload.token);
@@ -236,6 +241,7 @@ localStorage.setItem('hasActiveSubscription', String(action.payload.hasActiveSub
         state.verificationStatus = null;
         state.error = null;
         state.hasActiveSubscription = false;
+        state.businessId = null;
       });
   },
 });
