@@ -26,8 +26,8 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import DashboardPosts from "./pages/DashboardPosts";
 import DashboardComments from "./pages/DashboardComments";
 import DashboardPlaces from "./pages/DashboardPlaces";
-
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import PlaceProfilePage from "./components/places/PlaceProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -110,6 +110,7 @@ const App = () => (
                     <Route path="posts" element={<DashboardPosts />} />
                     <Route path="comments" element={<DashboardComments />} />
                     <Route path="places" element={<DashboardPlaces />} />
+                    <Route path="places/:id" element={<PlaceProfilePage />} />
                     {/* <Route path="ratings" element={<DashboardRatings />} />
   <Route path="colors" element={<BrandColors />} />
   <Route path="settings" element={<DashboardSettings />} /> */}

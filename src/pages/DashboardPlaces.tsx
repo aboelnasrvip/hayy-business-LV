@@ -6,7 +6,7 @@ import { useAppSelector } from '@/store/hooks';
 import { toast } from 'sonner';
 import AddEditPlaceModal from '@/components/places/AddEditPlaceModal';
 import DeleteConfirmModal from '@/components/places/DeleteConfirmModal';
-import PlaceDetailPanel from '@/components/places/PlaceDetailPanel';
+import { useNavigate } from 'react-router-dom';
 
 const neuCard =
   "rounded-[1.5rem] bg-[#e8ecf3] shadow-[12px_12px_24px_#adb5c0,-12px_-12px_24px_#ffffff] dark:bg-[#2b2e42] dark:shadow-[8px_8px_20px_#0e1020,-8px_-8px_20px_#343750]";
@@ -21,9 +21,8 @@ const DashboardPlaces = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingPlace, setEditingPlace] = useState<Place | null>(null);
   const [deletingPlace, setDeletingPlace] = useState<Place | null>(null);
-  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
+  const navigate = useNavigate();
   const { user } = useAppSelector(state => state.auth);
   const businessId = user?.businessId ?? '';
 
@@ -63,7 +62,6 @@ const DashboardPlaces = () => {
       await placesAPI.deletePlace(deletingPlace.id);
       toast.success('Place deleted');
       setPlaces(p => p.filter(place => place.id !== deletingPlace.id));
-      if (selectedPlace?.id === deletingPlace.id) setSelectedPlace(null);
       setDeletingPlace(null);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to delete place');
@@ -137,7 +135,8 @@ const DashboardPlaces = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.07 }}
                 whileHover={{ y: -2 }}
-                onClick={() => setSelectedPlace(place)}
+                onClick={() => navigate(`/dashboard/places/${place.id}`)}
+
                 className={`${neuCard} p-6 relative overflow-hidden cursor-pointer`}
               >
                 <div className="absolute top-0 left-6 right-6 h-[3px] rounded-full bg-gradient-to-r from-primary to-orange-400 opacity-60" />
@@ -224,16 +223,7 @@ const DashboardPlaces = () => {
         />
       )}
 
-      {/* Place Detail Side Panel */}
-      <AnimatePresence>
-        {selectedPlace && (
-          <PlaceDetailPanel
-            place={selectedPlace}
-            onClose={() => setSelectedPlace(null)}
-            onEdit={() => { setEditingPlace(selectedPlace); setSelectedPlace(null); }}
-          />
-        )}
-      </AnimatePresence>
+      
     </div>
   );
 };

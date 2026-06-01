@@ -307,7 +307,7 @@ const Register = () => {
           </div>
 
           {/* Google */}
-          <button
+          {/* <button
             onClick={handleGoogleSignup}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-sm font-medium transition-all
               text-gray-600 dark:text-gray-300
@@ -335,7 +335,7 @@ const Register = () => {
               />
             </svg>
             Continue with Google
-          </button>
+          </button> */}
 
           {/* Footer */}
           <div className="mt-5 text-center text-sm">

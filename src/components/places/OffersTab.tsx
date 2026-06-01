@@ -187,6 +187,7 @@ const OffersTab = ({ placeId }: Props) => {
         </div>
       ) : (
         <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3  gap-4">  
           {offers.map(offer => (
             <div key={offer.id} className={`${neuCard} rounded-2xl p-4`}>
               <div className="flex items-start justify-between gap-2">
@@ -236,6 +237,7 @@ const OffersTab = ({ placeId }: Props) => {
               </div>
             </div>
           ))}
+          </div>
         </div>
       )}
 

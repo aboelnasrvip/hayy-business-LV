@@ -202,7 +202,7 @@ const Login = () => {
           </div>
 
           {/* Google Button */}
-          <GoogleLogin
+          {/* <GoogleLogin
             onSuccess={async (credentialResponse) => {
               try {
                 const response = await dispatch(
@@ -237,7 +237,7 @@ const Login = () => {
             theme="outline"
             shape="circle"
             text="continue_with"
-          />
+          /> */}
 
           {/* Footer Links */}
           <div className="mt-6 text-center text-sm">

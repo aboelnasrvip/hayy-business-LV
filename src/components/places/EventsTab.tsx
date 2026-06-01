@@ -196,6 +196,7 @@ const EventsTab = ({ placeId }: Props) => {
         </div>
       ) : (
         <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3  gap-4">
           {events.map(event => (
             <div key={event.id} className={`${neuCard} rounded-2xl p-4`}>
               <div className="flex items-start justify-between gap-2">
@@ -246,8 +247,9 @@ const EventsTab = ({ placeId }: Props) => {
               {event.isSoldOut && (
                 <p className="text-[10px] text-red-500 font-semibold mt-1">Sold Out</p>
               )}
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
