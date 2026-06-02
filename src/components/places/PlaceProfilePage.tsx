@@ -6,7 +6,6 @@ import {
   Heart, Plus, Trash2, Loader, Info, CalendarDays, Tag,
 } from 'lucide-react';
 import { placesAPI, Place, CreatePlaceRequest } from '@/services/placesService';
-import { postsAPI, Post } from '@/services/postsService';
 import EventsTab from '@/components/places/EventsTab';
 import OffersTab from '@/components/places/OffersTab';
 import PostCommentsModal from '@/components/places/PostCommentsModal';
@@ -19,13 +18,10 @@ const neuCard = "bg-[#e0e5ec] shadow-[6px_6px_14px_#b8bec7,-6px_-6px_14px_#fffff
 const neuSmall = "bg-[#e0e5ec] shadow-[3px_3px_7px_#b8bec7,-3px_-3px_7px_#ffffff] dark:bg-[#252838] dark:shadow-[3px_3px_6px_#12151f,-3px_-3px_6px_#2e3248]";
 const neuInset = "bg-[#e0e5ec] shadow-[inset_4px_4px_8px_#b8bec7,inset_-4px_-4px_8px_#ffffff] dark:bg-[#252838] dark:shadow-[inset_3px_3px_7px_#12151f,inset_-3px_-3px_7px_#2e3248]";
 
-type Tab = 'info' | 'posts' | 'events' | 'offers';
+type Tab = 'info' ;
 
 const TABS: { id: Tab; label: string; icon: typeof Info }[] = [
-  { id: 'info',   label: 'Info',   icon: Info },
-  { id: 'posts',  label: 'Posts',  icon: MessageSquare },
-  { id: 'events', label: 'Events', icon: CalendarDays },
-  { id: 'offers', label: 'Offers', icon: Tag },
+  { id: 'info',  label: 'Info',  icon: Info },
 ];
 
 const DAYS: Record<number, string> = {
@@ -46,10 +42,7 @@ const PlaceProfilePage = () => {
   const [activeTab, setActiveTab] = useState<Tab>('info');
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Posts
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [postsLoading, setPostsLoading] = useState(false);
-  const [postsFetched, setPostsFetched] = useState(false);
+
   const [showAddPost, setShowAddPost] = useState(false);
   const [postContent, setPostContent] = useState('');
   const [postAttachments, setPostAttachments] = useState('');
@@ -66,15 +59,7 @@ const PlaceProfilePage = () => {
       .finally(() => setIsLoading(false));
   }, [id]);
 
-  useEffect(() => {
-    if (activeTab === 'posts' && !postsFetched && id) {
-      setPostsLoading(true);
-      postsAPI.getPostsByPlace(id)
-        .then(res => { setPosts(res.data); setPostsFetched(true); })
-        .catch(() => toast.error('Failed to load posts'))
-        .finally(() => setPostsLoading(false));
-    }
-  }, [activeTab, id, postsFetched]);
+
 
   const handleUpdate = async (data: CreatePlaceRequest) => {
     if (!id) return;
@@ -84,51 +69,8 @@ const PlaceProfilePage = () => {
     setPlace(updated);
   };
 
-  const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!place) return;
-    setIsSubmittingPost(true);
-    try {
-      const newPost = await postsAPI.createPost({
-        placeId: place.id, content: postContent, postAttachments,
-      });
-      setPosts(p => [newPost, ...p]);
-      setPostContent(''); setPostAttachments(''); setShowAddPost(false);
-      toast.success('Post created!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to create post');
-    } finally { setIsSubmittingPost(false); }
-  };
 
-  const handleUpdatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingPost) return;
-    setIsSubmittingPost(true);
-    try {
-      await postsAPI.updatePost(editingPost.id, {
-        content: editingPost.content,
-        postAttachments: editingPost.postAttachments,
-      });
-      setPosts(p => p.map(post => post.id === editingPost.id ? editingPost : post));
-      setEditingPost(null);
-      toast.success('Post updated!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to update post');
-    } finally { setIsSubmittingPost(false); }
-  };
 
-  const handleDeletePost = async () => {
-    if (!deletingPost) return;
-    setIsSubmittingPost(true);
-    try {
-      await postsAPI.deletePost(deletingPost.id);
-      setPosts(p => p.filter(post => post.id !== deletingPost.id));
-      setDeletingPost(null);
-      toast.success('Post deleted!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to delete post');
-    } finally { setIsSubmittingPost(false); }
-  };
 
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#e0e5ec] dark:bg-[#252838] pt-16">
@@ -287,158 +229,6 @@ const PlaceProfilePage = () => {
           </motion.div>
         )}
 
-        {/* POSTS */}
-        {activeTab === 'posts' && (
-          <motion.div key="posts" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-
-            {/* Add Post */}
-            {!showAddPost && !editingPost && (
-              <div className={`${neuCard} rounded-2xl p-4 flex items-center gap-3`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-primary ${neuInset}`}>
-                  {initial}
-                </div>
-                <button
-                  onClick={() => setShowAddPost(true)}
-                  className={`flex-1 text-left px-4 py-2.5 rounded-full text-sm text-gray-400 ${neuInset} hover:text-gray-600 dark:hover:text-gray-200 transition-colors`}
-                >
-                  What's on your mind?
-                </button>
-                <button
-                  onClick={() => setShowAddPost(true)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-bold text-white
-                    bg-gradient-to-r from-primary to-orange-500
-                    shadow-[3px_3px_8px_#b8bec7,-1px_-1px_4px_#ffffff] dark:shadow-[3px_3px_8px_#12151f]
-                    hover:opacity-90 transition-all"
-                >
-                  <Plus size={14} /> Post
-                </button>
-              </div>
-            )}
-
-            {/* Form */}
-            {(showAddPost || editingPost) && (
-              <form onSubmit={editingPost ? handleUpdatePost : handleCreatePost}
-                className={`${neuCard} rounded-2xl p-5 space-y-3`}>
-                <div className={`px-4 py-3 rounded-2xl ${neuInset}`}>
-                  <textarea
-                    autoFocus required rows={4}
-                    value={editingPost ? editingPost.content : postContent}
-                    onChange={e => editingPost
-                      ? setEditingPost({ ...editingPost, content: e.target.value })
-                      : setPostContent(e.target.value)
-                    }
-                    placeholder="What's on your mind?"
-                    className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 resize-none"
-                  />
-                </div>
-                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-full ${neuInset}`}>
-                  <input
-                    value={editingPost ? editingPost.postAttachments : postAttachments}
-                    onChange={e => editingPost
-                      ? setEditingPost({ ...editingPost, postAttachments: e.target.value })
-                      : setPostAttachments(e.target.value)
-                    }
-                    placeholder="Attachment URL (optional)"
-                    className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400"
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button type="button"
-                    onClick={() => { setShowAddPost(false); setEditingPost(null); }}
-                    className={`px-5 py-2.5 rounded-full text-sm font-semibold text-gray-500 ${neuSmall}`}>
-                    Cancel
-                  </button>
-                  <button type="submit" disabled={isSubmittingPost}
-                    className="px-5 py-2.5 rounded-full text-sm font-bold text-white
-                      bg-gradient-to-r from-primary to-orange-500
-                      shadow-[3px_3px_8px_#b8bec7] dark:shadow-[3px_3px_8px_#12151f]
-                      hover:opacity-90 disabled:opacity-50 transition-all">
-                    {isSubmittingPost ? 'Saving...' : editingPost ? 'Update' : 'Publish'}
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Posts List */}
-            {postsLoading ? (
-              <div className="flex justify-center py-12">
-                <Loader className="animate-spin text-primary" size={32} />
-              </div>
-            ) : posts.length === 0 ? (
-              <div className={`${neuCard} rounded-2xl p-12 text-center`}>
-                <MessageSquare size={40} className="text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400 font-medium">No posts yet</p>
-                <p className="text-gray-300 dark:text-gray-600 text-sm mt-1">Share something with your audience</p>
-              </div>
-            ) : (
-              posts.map((post, i) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  whileHover={{ y: -2 }}
-                  onClick={() => setViewingPost(post)}
-                  className={`${neuCard} rounded-2xl p-5 cursor-pointer transition-all`}
-                >
-                  {/* Post Header */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-primary ${neuInset}`}>
-                      {initial}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-700 dark:text-white">{place.name}</p>
-                      <p className="text-[10px] text-gray-400">{new Date(post.createdAt).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <p className="text-sm text-gray-700 dark:text-white leading-relaxed mb-4 line-clamp-4">
-                    {post.content}
-                  </p>
-
-                  {/* Footer */}
-                  <div className={`flex items-center justify-between pt-3 border-t border-gray-200/50 dark:border-gray-700/30`}>
-                    <div className="flex items-center gap-4 text-xs text-gray-400">
-                      <span className="flex items-center gap-1.5">
-                        <Heart size={13} className="text-rose-400" /> {post.likesCount}
-                      </span>
-                      <span className="flex items-center gap-1.5 text-primary font-medium">
-                        <MessageSquare size={13} /> {post.commentsCount} comments
-                      </span>
-                    </div>
-                    <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-                      <button
-                        onClick={() => { setEditingPost(post); setShowAddPost(false); }}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg ${neuSmall} text-gray-400 hover:text-primary transition-colors`}>
-                        <Edit size={13} />
-                      </button>
-                      <button
-                        onClick={() => setDeletingPost(post)}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg ${neuSmall} text-gray-400 hover:text-red-500 transition-colors`}>
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))
-            )}
-          </motion.div>
-        )}
-
-        {/* EVENTS */}
-        {activeTab === 'events' && (
-          <motion.div key="events" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <EventsTab placeId={place.id} />
-          </motion.div>
-        )}
-
-        {/* OFFERS */}
-        {activeTab === 'offers' && (
-          <motion.div key="offers" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <OffersTab placeId={place.id} />
-          </motion.div>
-        )}
       </div>
 
       {/* Modals */}
@@ -451,15 +241,7 @@ const PlaceProfilePage = () => {
         />
       )}
 
-      {deletingPost && (
-        <DeleteConfirmModal
-          title="Delete Post"
-          description="This action cannot be undone."
-          onConfirm={handleDeletePost}
-          onCancel={() => setDeletingPost(null)}
-          isLoading={isSubmittingPost}
-        />
-      )}
+      
 
       <AnimatePresence>
         {viewingPost && (

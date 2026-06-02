@@ -2,41 +2,24 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  FileText,
-  MessageSquare,
-  Star,
-  Palette,
-  Settings,
-  LogOut,
-  Menu,
-  Bell,
-  Sun,
-  Moon,
-  MapPin,
-  ChevronRight,
-  ChevronLeft,
+  LayoutDashboard, FileText, MessageSquare,
+  MapPin, CalendarDays, Tag, LogOut, Menu, Star,
+  Bell, Sun, Moon, ChevronRight, ChevronLeft,
 } from "lucide-react";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
-import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
 import { useIsMobile } from "@/hooks/use-mobile";
-const menuItems = [
-  { icon: LayoutDashboard, labelKey: "sidebar.dashboard", path: "/dashboard" },
-  { icon: MapPin, labelKey: "sidebar.places", path: "/dashboard/places" },
-  { icon: FileText, labelKey: "sidebar.posts", path: "/dashboard/posts" },
-  {
-    icon: MessageSquare,
-    labelKey: "sidebar.comments",
-    path: "/dashboard/comments",
-  },
-  { icon: Star, labelKey: "sidebar.ratings", path: "/dashboard/ratings" },
-  { icon: Palette, labelKey: "sidebar.brandColors", path: "/dashboard/colors" },
-  { icon: Settings, labelKey: "sidebar.settings", path: "/dashboard/settings" },
-];
 
+const menuItems = [
+  { icon: LayoutDashboard, labelKey: "Overview",  path: "/dashboard" },
+  { icon: MapPin,          labelKey: "Places",     path: "/dashboard/places" },
+  { icon: FileText,        labelKey: "Posts",      path: "/dashboard/posts" },
+  { icon: CalendarDays,    labelKey: "Events",     path: "/dashboard/events" },
+  { icon: Tag,             labelKey: "Offers",     path: "/dashboard/offers" },
+  { icon: Star,            labelKey: "Ratings",    path: "/dashboard/ratings" },
+];
 const neuBg = "bg-[#e0e5ec] dark:bg-[#252838]";
 const neuRaised =
   "bg-[#e0e5ec] shadow-[5px_5px_12px_#b8bec7,-5px_-5px_12px_#ffffff] dark:bg-[#252838] dark:shadow-[4px_4px_10px_#12151f,-4px_-4px_10px_#2e3248]";
@@ -166,11 +149,11 @@ const DashboardLayout = () => {
         <p className="font-bold text-sm text-gray-700 dark:text-white leading-none">
           {user?.fullName ?? t("dashboard.businessName")}
         </p>
-        {user?.email && (
+        {/* {user?.email && (
           <p className="text-[10px] text-gray-400 truncate max-w-[170px] text-center">
             {user.email}
           </p>
-        )}
+        )} */}
       </div>
 
       {/* Nav items */}

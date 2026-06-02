@@ -26,8 +26,13 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import DashboardPosts from "./pages/DashboardPosts";
 import DashboardComments from "./pages/DashboardComments";
 import DashboardPlaces from "./pages/DashboardPlaces";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import DashboardEvents from "./pages/DashboardEvents";
+import DashboardOffers from "./pages/DashboardOffers";
+import DashboardRatings from "./pages/DashboardRatings";
+// داخل الـ dashboard routes:
+<Route path="ratings" element={<DashboardRatings />} />
 import PlaceProfilePage from "./components/places/PlaceProfilePage";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const queryClient = new QueryClient();
 
@@ -42,7 +47,6 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <Routes>
-                  {/* Public Routes */}
                   <Route path="/" element={<Index />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/login" element={<Login />} />
@@ -50,70 +54,22 @@ const App = () => (
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
 
-                  {/* Protected Routes - No Subscription Required */}
-                  <Route
-                    path="/profile-setup"
-                    element={
-                      <ProtectedRoute>
-                        <ProfileSetup />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/business/onboarding"
-                    element={<BusinessOnboarding />}
-                  />
-                  <Route
-                    path="/onboarding/pending"
-                    element={
-                      <ProtectedRoute>
-                        <OnboardingPending />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/subscription-plans"
-                    element={
-                      <ProtectedRoute>
-                        <SubscriptionPlans />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/payment"
-                    element={
-                      <ProtectedRoute>
-                        <Payment />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/payment/success"
-                    element={
-                      <ProtectedRoute>
-                        <PaymentSuccess />
-                      </ProtectedRoute>
-                    }
-                  />
+                  <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
+                  <Route path="/business/onboarding" element={<BusinessOnboarding />} />
+                  <Route path="/onboarding/pending" element={<ProtectedRoute><OnboardingPending /></ProtectedRoute>} />
+                  <Route path="/subscription-plans" element={<ProtectedRoute><SubscriptionPlans /></ProtectedRoute>} />
+                  <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+                  <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
 
-                  {/* Protected Routes - Subscription Required */}
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    {/* ✅ Nested Routes */}
+                  <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                     <Route index element={<Dashboard />} />
-                    <Route path="posts" element={<DashboardPosts />} />
-                    <Route path="comments" element={<DashboardComments />} />
                     <Route path="places" element={<DashboardPlaces />} />
                     <Route path="places/:id" element={<PlaceProfilePage />} />
-                    {/* <Route path="ratings" element={<DashboardRatings />} />
-  <Route path="colors" element={<BrandColors />} />
-  <Route path="settings" element={<DashboardSettings />} /> */}
+                    <Route path="events" element={<DashboardEvents />} />
+                    <Route path="offers" element={<DashboardOffers />} />
+                    <Route path="posts" element={<DashboardPosts />} />
+                    <Route path="ratings" element={<DashboardRatings />} />
+                    <Route path="comments" element={<DashboardComments />} />
                   </Route>
 
                   <Route path="*" element={<NotFound />} />
