@@ -308,7 +308,7 @@ const DashboardRatings = () => {
   }, [selectedPlaceId]);
 
   return (
-    <div className="space-y-6 pt-16 max-w-3xl mx-auto">
+    <div className="space-y-6 pt-16  mx-auto">
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
@@ -372,6 +372,7 @@ const DashboardRatings = () => {
         </div>
       ) : (
         <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {reviews.map((review, i) => (
             <motion.div
               key={review.id}
@@ -380,8 +381,9 @@ const DashboardRatings = () => {
               transition={{ delay: i * 0.06 }}
             >
               <ReviewCard review={review} />
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
       )}
     </div>
