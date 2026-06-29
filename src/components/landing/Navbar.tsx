@@ -16,9 +16,10 @@ const Navbar = () => {
   const { t, direction } = useLanguage();
 
   const navItems = [
+    { name: t("nav.about"), href: "#hero" },
     { name: t("nav.features"), href: "#features" },
     { name: t("nav.pricing"), href: "#pricing" },
-    { name: t("nav.about"), href: "#about" },
+    
   ];
 
   return (

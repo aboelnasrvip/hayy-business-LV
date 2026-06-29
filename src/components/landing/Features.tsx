@@ -35,11 +35,11 @@ const Features = () => {
       titleKey: "features.analytics.title",
       descKey: "features.analytics.description",
     },
-    {
-      icon: Palette,
-      titleKey: "features.branding.title",
-      descKey: "features.branding.description",
-    },
+    // {
+    //   icon: Palette,
+    //   titleKey: "features.branding.title",
+    //   descKey: "features.branding.description",
+    // },
     {
       icon: ImageIcon,
       titleKey: "features.media.title",
@@ -55,11 +55,11 @@ const Features = () => {
       titleKey: "features.smart.title",
       descKey: "features.smart.description",
     },
-    {
-      icon: Globe,
-      titleKey: "features.multilang.title",
-      descKey: "features.multilang.description",
-    },
+    // {
+    //   icon: Globe,
+    //   titleKey: "features.multilang.title",
+    //   descKey: "features.multilang.description",
+    // },
   ];
 
   return (
@@ -97,7 +97,7 @@ const Features = () => {
         </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((feature, index) => (
             <motion.div
               key={index}

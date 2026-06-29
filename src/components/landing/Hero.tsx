@@ -23,6 +23,7 @@ const Hero = () => {
     <section
       className="min-h-screen flex items-center pt-28 pb-16 px-4 bg-[#e0e5ec] dark:bg-[#252838]"
       dir={direction}
+      id="hero"
     >
       <div className="container mx-auto max-w-6xl">
         <div className="grid lg:grid-cols-2 gap-14 items-center">
