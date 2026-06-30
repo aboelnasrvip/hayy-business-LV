@@ -118,7 +118,7 @@ export const authAPI = {
   },
 
   // Reset Password
-  resetPassword: async (data: { email: string; token: string; password: string; confirmPassword: string }) => {
+  resetPassword: async (data: { email: string; otp: string; newPassword: string; confirmPassword: string }) => {
     const response = await axios.post(`${API_BASE_URL}/api/web/auth/reset-password`, data);
     return response.data;
   },

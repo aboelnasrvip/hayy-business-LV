@@ -62,7 +62,7 @@ navigate(`/reset-password?email=${encodeURIComponent(email)}`);
           {/* Title */}
           <div className="text-center mb-7">
             <h1 className="text-xl font-bold text-gray-700 dark:text-white tracking-wide">Forgot Password?</h1>
-            <p className="text-gray-400 text-sm mt-1">Enter your email to receive a reset link</p>
+            <p className="text-gray-400 text-sm mt-1">Enter your email to receive an OTP code</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,7 +96,7 @@ navigate(`/reset-password?email=${encodeURIComponent(email)}`);
                 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
                 flex items-center justify-center gap-2"
             >
-              {isLoading ? <><Loader className="animate-spin" size={18} /> Sending...</> : "Send Reset Link"}
+              {isLoading ? <><Loader className="animate-spin" size={18} /> Sending...</> : "Reset Password"}
             </button>
           </form>
 

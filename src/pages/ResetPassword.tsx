@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Lock, Eye, EyeOff, Loader, Sun, Moon } from "lucide-react";
+import { Lock, Eye, EyeOff, Loader, Sun, Moon, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { authAPI } from "@/services/authService";
 import { useTheme } from "@/components/ui/ThemeProvider";
@@ -11,9 +11,9 @@ const ResetPassword = () => {
   const { theme, setTheme } = useTheme();
 
   const email = searchParams.get("email") || "";
-  const token = searchParams.get("token") || "";
 
-  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -21,12 +21,12 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) { toast.error("Passwords do not match"); return; }
-    if (password.length < 8) { toast.error("Password must be at least 8 characters"); return; }
+    if (newPassword !== confirmPassword) { toast.error("Passwords do not match"); return; }
+    if (newPassword.length < 8) { toast.error("Password must be at least 8 characters"); return; }
 
     setIsLoading(true);
     try {
-      await authAPI.resetPassword({ email, token, password, confirmPassword });
+      await authAPI.resetPassword({ email, otp, newPassword, confirmPassword });
       toast.success("Password reset successfully!");
       navigate("/login");
     } catch (error: any) {
@@ -58,7 +58,6 @@ const ResetPassword = () => {
       </button>
 
       <div className="w-full max-w-[380px]">
-        {/* Card */}
         <div className="rounded-[2rem] p-8
           bg-[#e0e5ec] shadow-[10px_10px_20px_#b8bec7,-10px_-10px_20px_#ffffff]
           dark:bg-[#252838] dark:shadow-[8px_8px_20px_#12151f,-8px_-8px_20px_#2e3248]">
@@ -75,10 +74,24 @@ const ResetPassword = () => {
           {/* Title */}
           <div className="text-center mb-7">
             <h1 className="text-xl font-bold text-gray-700 dark:text-white tracking-wide">Reset Password</h1>
-            <p className="text-gray-400 text-sm mt-1">Enter your new password</p>
+            <p className="text-gray-400 text-sm mt-1">Enter the OTP sent to <span className="text-primary font-medium">{email}</span></p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* OTP */}
+            <div dir="ltr" className={neuInput}>
+              <KeyRound size={17} className="text-gray-400 dark:text-gray-500 shrink-0" />
+              <input
+                type="text"
+                required
+                maxLength={10}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter OTP code"
+                className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 tracking-widest text-left"
+              />
+            </div>
 
             {/* New Password */}
             <div dir="ltr" className={neuInput}>
@@ -87,16 +100,13 @@ const ResetPassword = () => {
                 type={showPassword ? "text" : "password"}
                 required
                 minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New password"
                 className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-400 dark:text-gray-500 hover:text-primary shrink-0 transition-colors"
-              >
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="text-gray-400 dark:text-gray-500 hover:text-primary shrink-0 transition-colors">
                 {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
@@ -113,11 +123,8 @@ const ResetPassword = () => {
                 placeholder="Confirm password"
                 className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-left"
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="text-gray-400 dark:text-gray-500 hover:text-primary shrink-0 transition-colors"
-              >
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="text-gray-400 dark:text-gray-500 hover:text-primary shrink-0 transition-colors">
                 {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
@@ -141,7 +148,6 @@ const ResetPassword = () => {
             </button>
           </form>
 
-          {/* Footer */}
           <div className="mt-6 text-center text-sm">
             <Link to="/login" className="text-gray-500 dark:text-gray-400 hover:text-primary transition-colors">
               Back to Login
