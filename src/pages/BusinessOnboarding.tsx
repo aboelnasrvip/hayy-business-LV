@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/components/ui/ThemeProvider";
+import { setVerificationStatus } from "@/store/slices/authSlice";
+
 
 const BusinessOnboarding = () => {
   const navigate = useNavigate();
@@ -83,6 +85,7 @@ const BusinessOnboarding = () => {
     try {
       await dispatch(submitOnboarding(data)).unwrap();
       toast.success("Documents submitted successfully!");
+      dispatch(setVerificationStatus("Pending"));
       navigate("/onboarding/pending"); 
     } catch (err: any) {
       toast.error(err || "Submission failed");
