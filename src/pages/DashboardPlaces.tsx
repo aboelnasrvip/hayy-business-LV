@@ -190,15 +190,15 @@ const DashboardPlaces = () => {
     }
   };
 
-  const handleCreate = async (data: CreatePlaceRequest) => {
-    await placesAPI.createPlace(data);
+  const handleCreate = async (data: CreatePlaceRequest, imageFile?: File) => {
+    await placesAPI.createPlace(data, imageFile);
     toast.success('Place created successfully!');
     fetchPlaces();
   };
 
-  const handleUpdate = async (data: CreatePlaceRequest) => {
+  const handleUpdate = async (data: CreatePlaceRequest, imageFile?: File) => {
     if (!editingPlace) return;
-    await placesAPI.updatePlace(editingPlace.id, data);
+    await placesAPI.updatePlace(editingPlace.id, data, imageFile);
     toast.success('Place updated successfully!');
     setEditingPlace(null);
     fetchPlaces();

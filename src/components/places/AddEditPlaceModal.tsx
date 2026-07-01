@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapPin, Navigation, Loader, X, Image, Clock } from 'lucide-react';
+import { MapPin, Navigation, Loader, X, Clock, UploadCloud, Link2, Trash2 } from 'lucide-react';
 import LocationPicker from '@/components/dashboard/LocationPicker';
 import CategoryPickerModal from './CategoryPickerModal';
 import { Place, CreatePlaceRequest, OpeningHour } from '@/services/placesService';
@@ -12,7 +12,7 @@ const neuSmall = "bg-[#e0e5ec] shadow-[3px_3px_7px_#b8bec7,-3px_-3px_7px_#ffffff
 interface Props {
   place?: Place;
   businessId: string;
-  onSubmit: (data: CreatePlaceRequest) => Promise<void>;
+  onSubmit: (data: CreatePlaceRequest, imageFile?: File) => Promise<void>;
   onClose: () => void;
 }
 
@@ -46,6 +46,9 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
   const [locating, setLocating] = useState(false);
   const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
   const [hoursMap, setHoursMap] = useState<HoursMap>(initHours(place?.openingHours));
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string>(place?.coverImage ?? '');
+  const [urlMode, setUrlMode] = useState(false);
 
   const [formData, setFormData] = useState({
     name: place?.name ?? '',
@@ -56,6 +59,25 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
     categoryId: '',
     categoryName: place?.categoryName ?? '',
   });
+
+  const handleCoverFile = (file: File | null) => {
+    if (!file) return;
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+    setFormData(p => ({ ...p, coverImage: '' }));
+  };
+
+  const handleCoverUrl = (url: string) => {
+    setCoverFile(null);
+    setFormData(p => ({ ...p, coverImage: url }));
+    setCoverPreview(url);
+  };
+
+  const clearCover = () => {
+    setCoverFile(null);
+    setFormData(p => ({ ...p, coverImage: '' }));
+    setCoverPreview('');
+  };
 
   const toggleDay = (day: number) =>
     setHoursMap(prev => ({
@@ -99,17 +121,20 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
 
     setIsSubmitting(true);
     try {
-      await onSubmit({
-        name: formData.name,
-        description: formData.description,
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-        coverImage: formData.coverImage || undefined,
-        categoryId: formData.categoryId || null,
-        businessId,
-        tagIds: [],
-        openingHours,
-      });
+      await onSubmit(
+        {
+          name: formData.name,
+          description: formData.description,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          coverImage: coverFile ? undefined : (formData.coverImage || undefined),
+          categoryId: formData.categoryId || null,
+          businessId,
+          tagIds: [],
+          openingHours,
+        },
+        coverFile ?? undefined,
+      );
       onClose();
     } finally {
       setIsSubmitting(false);
@@ -155,15 +180,95 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
               />
             </div>
 
-            {/* Cover Image URL */}
-            <div className={`flex items-center gap-3 px-5 py-1 rounded-full ${neuInset}`}>
-              <Image size={15} className="text-gray-400 shrink-0" />
-              <input
-                value={formData.coverImage}
-                onChange={e => setFormData(p => ({ ...p, coverImage: e.target.value }))}
-                placeholder="Cover Image URL (optional)"
-                className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 py-3"
-              />
+            {/* Cover Image */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
+                Cover Image (optional)
+              </p>
+
+              {/* Preview / Upload Zone */}
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="cover-file-input"
+                  className="hidden"
+                  onChange={e => handleCoverFile(e.target.files?.[0] ?? null)}
+                />
+
+                {coverPreview ? (
+                  /* ── Image Preview ── */
+                  <div className={`relative rounded-2xl overflow-hidden ${neuInset} p-1`}>
+                    <img
+                      src={coverPreview}
+                      alt="Cover preview"
+                      className="w-full h-36 object-cover rounded-xl"
+                    />
+                    <div className="absolute top-3 right-3 flex gap-1.5">
+                      <label
+                        htmlFor="cover-file-input"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg cursor-pointer
+                          bg-white/80 dark:bg-[#252838]/80 backdrop-blur-sm
+                          text-gray-500 hover:text-primary transition-colors
+                          shadow-[2px_2px_5px_rgba(0,0,0,0.15)]"
+                        title="Change image"
+                      >
+                        <UploadCloud size={13} />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={clearCover}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg
+                          bg-white/80 dark:bg-[#252838]/80 backdrop-blur-sm
+                          text-gray-500 hover:text-red-500 transition-colors
+                          shadow-[2px_2px_5px_rgba(0,0,0,0.15)]"
+                        title="Remove image"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* ── Upload Zone ── */
+                  <label
+                    htmlFor="cover-file-input"
+                    className={`flex flex-col items-center justify-center gap-2 w-full h-28
+                      rounded-2xl cursor-pointer transition-all border-2 border-dashed
+                      border-gray-300 dark:border-gray-600 hover:border-primary
+                      ${neuInset}`}
+                  >
+                    <UploadCloud size={24} className="text-gray-400" />
+                    <span className="text-xs text-gray-400 font-medium">
+                      Click to upload cover image
+                    </span>
+                    <span className="text-[10px] text-gray-300 dark:text-gray-600">
+                      PNG, JPG, WEBP
+                    </span>
+                  </label>
+                )}
+              </div>
+
+              {/* URL toggle */}
+              <button
+                type="button"
+                onClick={() => setUrlMode(p => !p)}
+                className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-primary transition-colors px-1"
+              >
+                <Link2 size={11} />
+                {urlMode ? 'Hide URL input' : 'Or enter image URL instead'}
+              </button>
+
+              {urlMode && (
+                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-full ${neuInset}`}>
+                  <Link2 size={13} className="text-gray-400 shrink-0" />
+                  <input
+                    value={formData.coverImage.startsWith('data:') ? '' : formData.coverImage}
+                    onChange={e => handleCoverUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Category Picker */}
