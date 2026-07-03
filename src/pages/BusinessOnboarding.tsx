@@ -32,6 +32,25 @@ const BusinessOnboarding = () => {
     commercialRegNumber: "",
     taxNumber: "",
   });
+  const [fieldErrors, setFieldErrors] = useState({ commercialRegNumber: "", taxNumber: "" });
+
+  const validateNumbers = (): boolean => {
+    const cr  = formData.commercialRegNumber.replace(/\D/g, "");
+    const tax = formData.taxNumber.replace(/\D/g, "");
+    const errs = { commercialRegNumber: "", taxNumber: "" };
+    if (!/^\d+$/.test(formData.commercialRegNumber) || cr.length < 5 || cr.length > 20)
+      errs.commercialRegNumber = "Commercial Registration Number must be between 5 and 20 digits.";
+    if (!/^\d+$/.test(formData.taxNumber) || tax.length < 9 || tax.length > 15)
+      errs.taxNumber = "Tax Number must be between 9 and 15 digits.";
+    setFieldErrors(errs);
+    return !errs.commercialRegNumber && !errs.taxNumber;
+  };
+
+  const handleNumberInput = (field: "commercialRegNumber" | "taxNumber", raw: string) => {
+    const digitsOnly = raw.replace(/\D/g, "");
+    setFormData(p => ({ ...p, [field]: digitsOnly }));
+    setFieldErrors(p => ({ ...p, [field]: "" }));
+  };
 
   const [files, setFiles] = useState({
     logoImage: null as File | null,
@@ -62,6 +81,11 @@ const BusinessOnboarding = () => {
     e.preventDefault();
     dispatch(clearError());
 
+    if (!validateNumbers()) {
+      setCurrentStep(1);
+      return;
+    }
+
     if (
       !files.logoImage ||
       !files.commercialRegImage ||
@@ -87,8 +111,8 @@ const BusinessOnboarding = () => {
       toast.success("Documents submitted successfully!");
       dispatch(setVerificationStatus("Pending"));
       navigate("/onboarding/pending"); 
-    } catch (err: any) {
-      toast.error(err || "Submission failed");
+    } catch (err) {
+      toast.error(typeof err === 'string' ? err : "Submission failed");
     }
   };
 
@@ -256,43 +280,50 @@ const BusinessOnboarding = () => {
 
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2">
-                      Commercial Reg. Number *
+                      Commercial Reg. Number * <span className="normal-case font-normal text-gray-400">(5–20 digits)</span>
                     </label>
                     <input
                       type="text"
+                      inputMode="numeric"
                       required
+                      maxLength={20}
                       value={formData.commercialRegNumber}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          commercialRegNumber: e.target.value,
-                        })
-                      }
-                      placeholder="CR Number"
-                      className={neuInput}
+                      onChange={(e) => handleNumberInput("commercialRegNumber", e.target.value)}
+                      placeholder="e.g. 1234567890"
+                      className={`${neuInput} ${fieldErrors.commercialRegNumber ? "ring-2 ring-red-400" : ""}`}
                     />
+                    {fieldErrors.commercialRegNumber && (
+                      <p className="text-xs text-red-500 px-2 flex items-center gap-1 mt-0.5">
+                        <AlertCircle size={11} className="shrink-0" /> {fieldErrors.commercialRegNumber}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-2">
-                      Tax Number *
+                      Tax Number * <span className="normal-case font-normal text-gray-400">(9–15 digits)</span>
                     </label>
                     <input
                       type="text"
+                      inputMode="numeric"
                       required
+                      maxLength={15}
                       value={formData.taxNumber}
-                      onChange={(e) =>
-                        setFormData({ ...formData, taxNumber: e.target.value })
-                      }
-                      placeholder="Tax ID Number"
-                      className={neuInput}
+                      onChange={(e) => handleNumberInput("taxNumber", e.target.value)}
+                      placeholder="e.g. 123456789"
+                      className={`${neuInput} ${fieldErrors.taxNumber ? "ring-2 ring-red-400" : ""}`}
                     />
+                    {fieldErrors.taxNumber && (
+                      <p className="text-xs text-red-500 px-2 flex items-center gap-1 mt-0.5">
+                        <AlertCircle size={11} className="shrink-0" /> {fieldErrors.taxNumber}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => setCurrentStep(2)}
+                  onClick={() => { if (validateNumbers()) setCurrentStep(2); }}
                   className={`w-full py-3.5 ${neuBtnPrimary}`}
                 >
                   Continue <ArrowRight size={18} />
