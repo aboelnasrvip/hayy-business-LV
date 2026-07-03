@@ -121,7 +121,7 @@ const DashboardProfile = () => {
   const initial = profile.brandName[0]?.toUpperCase() ?? '?';
 
   return (
-    <div className="space-y-6 pt-16 max-w-2xl mx-auto">
+    <div className="space-y-6 pt-16  mx-auto">
 
       {/* ── Header ── */}
       <div>
