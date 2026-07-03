@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -21,18 +23,17 @@ import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
-import DashboardPosts from "./pages/DashboardPosts";
-import DashboardComments from "./pages/DashboardComments";
 import DashboardPlaces from "./pages/DashboardPlaces";
 import DashboardEvents from "./pages/DashboardEvents";
 import DashboardOffers from "./pages/DashboardOffers";
+import DashboardPosts from "./pages/DashboardPosts";
+import DashboardComments from "./pages/DashboardComments";
 import DashboardRatings from "./pages/DashboardRatings";
-// داخل الـ dashboard routes:
-<Route path="ratings" element={<DashboardRatings />} />
+import DashboardProfile from "./pages/DashboardProfile";
 import PlaceProfilePage from "./components/places/PlaceProfilePage";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
                     <Route path="posts" element={<DashboardPosts />} />
                     <Route path="ratings" element={<DashboardRatings />} />
                     <Route path="comments" element={<DashboardComments />} />
+                    <Route path="profile" element={<DashboardProfile />} />
                   </Route>
 
                   <Route path="*" element={<NotFound />} />

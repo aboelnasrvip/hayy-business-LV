@@ -2,15 +2,16 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, FileText, MessageSquare,
+  LayoutDashboard, FileText,
   MapPin, CalendarDays, Tag, LogOut, Menu, Star,
-  Bell, Sun, Moon, ChevronRight, ChevronLeft,
+  Bell, Sun, Moon, ChevronRight, ChevronLeft, User,
 } from "lucide-react";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BusinessProfileProvider, useBusinessProfile } from "@/contexts/BusinessProfileContext";
 
 const menuItems = [
   { icon: LayoutDashboard, labelKey: "Overview",  path: "/dashboard" },
@@ -19,8 +20,8 @@ const menuItems = [
   { icon: CalendarDays,    labelKey: "Events",     path: "/dashboard/events" },
   { icon: Tag,             labelKey: "Offers",     path: "/dashboard/offers" },
   { icon: Star,            labelKey: "Ratings",    path: "/dashboard/ratings" },
+  { icon: User,            labelKey: "Profile",    path: "/dashboard/profile" },
 ];
-const neuBg = "bg-[#e0e5ec] dark:bg-[#252838]";
 const neuRaised =
   "bg-[#e0e5ec] shadow-[5px_5px_12px_#b8bec7,-5px_-5px_12px_#ffffff] dark:bg-[#252838] dark:shadow-[4px_4px_10px_#12151f,-4px_-4px_10px_#2e3248]";
 const neuSmall =
@@ -28,7 +29,8 @@ const neuSmall =
 const neuInset =
   "shadow-[inset_3px_3px_7px_#b8bec7,inset_-3px_-3px_7px_#ffffff] dark:shadow-[inset_3px_3px_6px_#12151f,inset_-3px_-3px_6px_#2e3248]";
 
-const DashboardLayout = () => {
+/* ─────────────────── INNER LAYOUT (uses context) ─────────────────── */
+const DashboardLayoutInner = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
@@ -37,6 +39,7 @@ const DashboardLayout = () => {
   const { theme, setTheme } = useTheme();
   const { t, direction } = useLanguage();
   const user = useAppSelector((s) => s.auth.user);
+  const { profile: bizProfile } = useBusinessProfile();
 
   const isActive = (path: string) => location.pathname === path;
   const handleLogout = async () => {
@@ -46,26 +49,29 @@ const DashboardLayout = () => {
   const pageTitle = menuItems.find((item) => isActive(item.path));
   const isMobile = useIsMobile();
   const sidebarWidth = collapsed ? 68 : 210;
-  /* ─────────────────── COLLAPSED ─────────────────── */
+
+  const logoNode = bizProfile?.logoImage ? (
+    <img src={bizProfile.logoImage} alt="Logo" className="w-full h-full object-cover" />
+  ) : (
+    <span className="font-black text-primary">
+      {(bizProfile?.brandName ?? user?.fullName)?.[0]?.toUpperCase() ?? "A"}
+    </span>
+  );
+
+  /* ───── COLLAPSED SIDEBAR ───── */
   const CollapsedSidebar = () => (
     <div
       className="flex flex-col h-full py-6 px-3 items-center gap-3 w-[68px]
-  bg-[#e0e5ec] shadow-[inset_-10px_0_20px_#b8bec7]
-  dark:bg-[#252838] dark:shadow-[inset_-10px_0_20px_#0e1020]"
+      bg-[#e0e5ec] shadow-[inset_-10px_0_20px_#b8bec7]
+      dark:bg-[#252838] dark:shadow-[inset_-10px_0_20px_#0e1020]"
     >
-      {/* Logo → expand */}
       <button
         onClick={() => setCollapsed(false)}
         className={`w-11 h-11 flex items-center justify-center rounded-xl mb-1 transition-all ${neuRaised}`}
       >
-        <img
-          src="/logo.png"
-          className="w-6 h-6 object-contain rounded-full"
-          alt="Logo"
-        />
+        <img src="/logo.png" className="w-6 h-6 object-contain rounded-full" alt="Logo" />
       </button>
 
-      {/* Icon list */}
       <nav className="flex-1 flex flex-col gap-3 items-center w-full">
         {menuItems.map((item) => {
           const active = isActive(item.path);
@@ -73,10 +79,9 @@ const DashboardLayout = () => {
             <Link key={item.path} to={item.path} title={t(item.labelKey)}>
               <div
                 className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-200
-                ${
-                  active
-                    ? "bg-gradient-to-br from-primary to-orange-500 text-white shadow-[3px_3px_8px_#b8bec7,-1px_-1px_4px_#ffffff] dark:shadow-[3px_3px_8px_#12151f,-1px_-1px_4px_#2e3248]"
-                    : `text-gray-400 dark:text-gray-500 hover:text-primary ${neuSmall}`
+                ${active
+                  ? "bg-gradient-to-br from-primary to-orange-500 text-white shadow-[3px_3px_8px_#b8bec7,-1px_-1px_4px_#ffffff] dark:shadow-[3px_3px_8px_#12151f,-1px_-1px_4px_#2e3248]"
+                  : `text-gray-400 dark:text-gray-500 hover:text-primary ${neuSmall}`
                 }`}
               >
                 <item.icon size={18} />
@@ -86,7 +91,6 @@ const DashboardLayout = () => {
         })}
       </nav>
 
-      {/* Logout */}
       <button
         onClick={handleLogout}
         title={t("dashboard.signOut")}
@@ -97,34 +101,23 @@ const DashboardLayout = () => {
     </div>
   );
 
-  /* ─────────────────── EXPANDED ─────────────────── */
+  /* ───── EXPANDED SIDEBAR ───── */
   const ExpandedSidebar = ({ onClose }: { onClose?: () => void }) => (
     <div
       className="flex flex-col h-full py-6 px-4 w-[210px]
-  bg-[#e0e5ec] shadow-[inset_-10px_0_20px_#b8bec7]
-  dark:bg-[#252838] dark:shadow-[inset_-10px_0_20px_#0e1020]"
+      bg-[#e0e5ec] shadow-[inset_-10px_0_20px_#b8bec7]
+      dark:bg-[#252838] dark:shadow-[inset_-10px_0_20px_#0e1020]"
     >
-      {/* Top: logo + collapse btn */}
+      {/* Top: app logo + collapse btn */}
       <div className="flex items-center justify-between mb-5 px-1">
         <Link to="/" className="flex items-center gap-2" onClick={onClose}>
-          <div
-            className={`w-9 h-9 rounded-xl flex items-center justify-center ${neuSmall}`}
-          >
-            <img
-              src="/logo.png"
-              className="w-6 h-6 object-contain rounded-full"
-              alt="Logo"
-            />
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${neuSmall}`}>
+            <img src="/logo.png" className="w-6 h-6 object-contain rounded-full" alt="Logo" />
           </div>
-          <span className="font-black text-base text-gray-700 dark:text-white">
-            HAYY
-          </span>
+          <span className="font-black text-base text-gray-700 dark:text-white">HAYY</span>
         </Link>
         <button
-          onClick={() => {
-            setCollapsed(true);
-            onClose?.();
-          }}
+          onClick={() => { setCollapsed(true); onClose?.(); }}
           className={`hidden lg:flex w-7 h-7 items-center justify-center rounded-lg transition-all ${neuSmall}`}
         >
           {direction === "rtl" ? (
@@ -135,26 +128,17 @@ const DashboardLayout = () => {
         </button>
       </div>
 
-      {/* Avatar card */}
-      <div
-        className={`flex flex-col items-center gap-2 py-5 rounded-2xl mb-4 ${neuRaised}`}
-      >
-        <div
-          className={`w-16 h-16 rounded-full flex items-center justify-center ${neuInset} bg-[#e0e5ec] dark:bg-[#252838]`}
-        >
-          <span className="text-2xl font-black text-primary">
-            {user?.fullName?.[0]?.toUpperCase() ?? "A"}
-          </span>
-        </div>
-        <p className="font-bold text-sm text-gray-700 dark:text-white leading-none">
-          {user?.fullName ?? t("dashboard.businessName")}
-        </p>
-        {/* {user?.email && (
-          <p className="text-[10px] text-gray-400 truncate max-w-[170px] text-center">
-            {user.email}
+      {/* Business avatar card — clickable → profile */}
+      <Link to="/dashboard/profile" onClick={onClose}>
+        <div className={`flex flex-col items-center gap-2 py-5 rounded-2xl mb-4 ${neuRaised} hover:opacity-90 transition-opacity cursor-pointer`}>
+          <div className={`w-16 h-16 rounded-full overflow-hidden flex items-center justify-center ${neuInset} bg-[#e0e5ec] dark:bg-[#252838] text-2xl`}>
+            {logoNode}
+          </div>
+          <p className="font-bold text-sm text-gray-700 dark:text-white leading-none text-center px-2">
+            {bizProfile?.brandName ?? user?.fullName ?? t("dashboard.businessName")}
           </p>
-        )} */}
-      </div>
+        </div>
+      </Link>
 
       {/* Nav items */}
       <nav className="flex-1 flex flex-col gap-1 w-full">
@@ -164,10 +148,9 @@ const DashboardLayout = () => {
             <Link key={item.path} to={item.path} onClick={onClose}>
               <div
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                ${
-                  active
-                    ? `text-primary font-semibold ${neuInset} bg-[#e0e5ec] dark:bg-[#252838]`
-                    : "text-gray-500 dark:text-gray-400 hover:text-primary"
+                ${active
+                  ? `text-primary font-semibold ${neuInset} bg-[#e0e5ec] dark:bg-[#252838]`
+                  : "text-gray-500 dark:text-gray-400 hover:text-primary"
                 }`}
               >
                 <item.icon size={18} className="shrink-0" />
@@ -178,7 +161,6 @@ const DashboardLayout = () => {
         })}
       </nav>
 
-      {/* Logout */}
       <button
         onClick={handleLogout}
         className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-500 transition-colors"
@@ -189,19 +171,14 @@ const DashboardLayout = () => {
     </div>
   );
 
-  /* ─────────────────── ROOT ─────────────────── */
+  /* ───── ROOT ───── */
   return (
-    <div
-      className="min-h-screen flex bg-[#e0e5ec] dark:bg-[#252838]"
-      dir={direction}
-    >
+    <div className="min-h-screen flex bg-[#e0e5ec] dark:bg-[#252838]" dir={direction}>
       {/* Mobile overlay */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setMobileOpen(false)}
             className="fixed inset-0 bg-black/40 z-40 lg:hidden"
           />
@@ -225,7 +202,7 @@ const DashboardLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Desktop sidebar — animates width */}
+      {/* Desktop sidebar */}
       <motion.aside
         animate={{ width: collapsed ? 68 : 210 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -239,8 +216,8 @@ const DashboardLayout = () => {
         {/* Navbar */}
         <header
           className="fixed top-4 right-4 z-30 px-4 py-2.5 rounded-2xl flex items-center justify-between
-  bg-[#e0e5ec] shadow-[6px_6px_14px_#b8bec7,-6px_-6px_14px_#ffffff]
-  dark:bg-[#252838] dark:shadow-[5px_5px_12px_#12151f,-5px_-5px_12px_#2e3248]"
+          bg-[#e0e5ec] shadow-[6px_6px_14px_#b8bec7,-6px_-6px_14px_#ffffff]
+          dark:bg-[#252838] dark:shadow-[5px_5px_12px_#12151f,-5px_-5px_12px_#2e3248]"
           style={{ left: isMobile ? "16px" : `${sidebarWidth + 16}px` }}
         >
           <div className="flex items-center gap-3">
@@ -256,7 +233,6 @@ const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* <LanguageSwitcher /> */}
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className={`w-9 h-9 flex items-center justify-center rounded-xl ${neuSmall}`}
@@ -267,19 +243,19 @@ const DashboardLayout = () => {
                 <Moon size={17} className="text-gray-500" />
               )}
             </button>
-            <button
-              className={`relative w-9 h-9 flex items-center justify-center rounded-xl ${neuSmall}`}
-            >
+            <button className={`relative w-9 h-9 flex items-center justify-center rounded-xl ${neuSmall}`}>
               <Bell size={17} className="text-gray-600 dark:text-gray-400" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-[#e0e5ec] dark:ring-[#252838]" />
             </button>
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center ${neuSmall}`}
-            >
-              <span className="font-bold text-sm text-primary">
-                {user?.fullName?.[0]?.toUpperCase() ?? "A"}
-              </span>
-            </div>
+            {/* Profile avatar — updates instantly from context */}
+            <Link to="/dashboard/profile">
+              <div
+                className={`w-9 h-9 rounded-full overflow-hidden flex items-center justify-center ${neuSmall} cursor-pointer hover:opacity-80 transition-opacity text-sm`}
+                title="Business Profile"
+              >
+                {logoNode}
+              </div>
+            </Link>
           </div>
         </header>
 
@@ -290,5 +266,12 @@ const DashboardLayout = () => {
     </div>
   );
 };
+
+/* ─────────────────── WRAPPER (provides context) ─────────────────── */
+const DashboardLayout = () => (
+  <BusinessProfileProvider>
+    <DashboardLayoutInner />
+  </BusinessProfileProvider>
+);
 
 export default DashboardLayout;
