@@ -61,9 +61,9 @@ const PlaceProfilePage = () => {
 
 
 
-  const handleUpdate = async (data: CreatePlaceRequest) => {
+  const handleUpdate = async (data: CreatePlaceRequest, imageFile?: File) => {
     if (!id) return;
-    await placesAPI.updatePlace(id, data);
+    await placesAPI.updatePlace(id, data, imageFile);  
     toast.success('Place updated!');
     const updated = await placesAPI.getPlaceById(id);
     setPlace(updated);
