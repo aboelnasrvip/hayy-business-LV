@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, MapPin, Edit, Trash2, Clock, Star, Loader,
+  Plus, MapPin, Edit3, Trash2, Clock, Star, Loader,
+  ChevronRight, Tag,
 } from 'lucide-react';
 import { placesAPI, Place, CreatePlaceRequest } from '@/services/placesService';
 import { useAppSelector } from '@/store/hooks';
@@ -11,7 +12,7 @@ import DeleteConfirmModal from '@/components/places/DeleteConfirmModal';
 import { useNavigate } from 'react-router-dom';
 
 const neuCard =
-  "rounded-[1.5rem] bg-[#e8ecf3] shadow-[12px_12px_24px_#adb5c0,-12px_-12px_24px_#ffffff] dark:bg-[#2b2e42] dark:shadow-[8px_8px_20px_#0e1020,-8px_-8px_20px_#343750]";
+  "rounded-[1.75rem] bg-[#e8ecf3] shadow-[12px_12px_24px_#adb5c0,-12px_-12px_24px_#ffffff] dark:bg-[#2b2e42] dark:shadow-[8px_8px_20px_#0e1020,-8px_-8px_20px_#343750]";
 const neuSmall =
   "bg-[#e0e5ec] shadow-[3px_3px_7px_#b8bec7,-3px_-3px_7px_#ffffff] dark:bg-[#252838] dark:shadow-[3px_3px_6px_#12151f,-3px_-3px_6px_#2e3248]";
 const neuInset =
@@ -20,16 +21,18 @@ const neuInset =
 const isValidUrl = (url?: string) =>
   !!url && url !== 'string' && url.trim() !== '' && url.startsWith('http');
 
-/* ─── Gradient palette per initial letter ─── */
-const GRADIENTS: Record<string, string> = {
-  A: 'from-rose-400 to-pink-500',    B: 'from-orange-400 to-amber-500',
-  C: 'from-yellow-400 to-orange-400',D: 'from-emerald-400 to-teal-500',
-  E: 'from-cyan-400 to-blue-500',    F: 'from-violet-400 to-purple-500',
-  G: 'from-fuchsia-400 to-pink-500', H: 'from-sky-400 to-indigo-500',
-  I: 'from-lime-400 to-green-500',   J: 'from-red-400 to-rose-500',
-};
-const getGradient = (name: string) =>
-  GRADIENTS[name[0]?.toUpperCase()] ?? 'from-primary to-orange-500';
+const PALETTE = [
+  ['from-rose-400 to-pink-600',    'bg-rose-50   dark:bg-rose-900/30   text-rose-500'],
+  ['from-orange-400 to-amber-500', 'bg-orange-50 dark:bg-orange-900/30 text-orange-500'],
+  ['from-emerald-400 to-teal-500', 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600'],
+  ['from-violet-400 to-purple-600','bg-violet-50 dark:bg-violet-900/30 text-violet-500'],
+  ['from-sky-400 to-indigo-500',   'bg-sky-50    dark:bg-sky-900/30    text-sky-500'],
+  ['from-fuchsia-400 to-pink-500', 'bg-fuchsia-50 dark:bg-fuchsia-900/30 text-fuchsia-500'],
+  ['from-lime-400 to-green-500',   'bg-lime-50   dark:bg-lime-900/30   text-lime-600'],
+  ['from-cyan-400 to-blue-500',    'bg-cyan-50   dark:bg-cyan-900/30   text-cyan-500'],
+];
+const getPalette = (name: string) =>
+  PALETTE[(name.charCodeAt(0) ?? 0) % PALETTE.length];
 
 /* ─── Place Card ─── */
 interface PlaceCardProps {
@@ -41,121 +44,131 @@ interface PlaceCardProps {
 }
 
 const PlaceCard = ({ place, index, onEdit, onDelete, onClick }: PlaceCardProps) => {
-  const initial   = place.name[0]?.toUpperCase() ?? '?';
-  const gradient  = getGradient(place.name);
-  const hasCover  = isValidUrl(place.coverImage);
-  const firstHour = place.openingHours?.[0];
+  const initial  = place.name[0]?.toUpperCase() ?? '?';
+  const [gradient, catCls] = getPalette(place.name);
+  const hasCover = isValidUrl(place.coverImage);
+  const todayHours = place.openingHours?.[0];
+  const hasRating  = place.rating > 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 28 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ delay: index * 0.06 }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      exit={{ opacity: 0, scale: 0.94 }}
+      transition={{ delay: index * 0.055, type: 'spring', stiffness: 260, damping: 22 }}
+      whileHover={{ y: -5, transition: { duration: 0.18 } }}
       onClick={() => onClick(place)}
-      className={`${neuCard} overflow-hidden cursor-pointer group relative flex flex-col`}
+      className={`${neuCard} overflow-hidden cursor-pointer group flex flex-col`}
     >
-
-      {/* ── Cover / Banner ── */}
-      <div className="relative h-28 overflow-hidden rounded-t-[1.5rem]">
+      {/* ══ COVER ══ */}
+      <div className="relative h-36 shrink-0 overflow-hidden rounded-t-[1.75rem]">
         {hasCover ? (
-          <img
-            src={place.coverImage}
-            alt={place.name}
-            className="w-full h-full object-cover"
-          />
+          <>
+            <img src={place.coverImage} alt={place.name} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+          </>
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} relative`}>
-            {/* decorative circles */}
-            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-white/10" />
-            <div className="absolute bottom-2 right-10 w-12 h-12 rounded-full bg-white/10" />
-            <div className="absolute top-4 left-1/3 w-24 h-24 rounded-full bg-white/5" />
-            {/* big initial */}
-            <span className="absolute bottom-2 left-4 text-6xl font-black text-white/20 select-none leading-none">
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} relative overflow-hidden`}>
+            <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10" />
+            <div className="absolute bottom-0 left-1/2 w-32 h-32 rounded-full bg-black/10 translate-x-2" />
+            <span className="absolute -bottom-3 right-4 text-[80px] font-black text-white/15 select-none leading-none">
               {initial}
             </span>
           </div>
         )}
 
-        {/* Action buttons — top-right, hidden until hover */}
+        {/* Rating — always visible, top-left */}
+        <div className="absolute top-3 left-3">
+          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold backdrop-blur-sm
+            ${hasRating ? 'bg-amber-400/90 text-white shadow-md' : 'bg-black/30 text-white/70'}`}>
+            <Star size={10} className={hasRating ? 'fill-white text-white' : 'text-white/60'} />
+            {hasRating ? place.rating.toFixed(1) : 'No rating'}
+          </div>
+        </div>
+
+        {/* Action buttons — top-right, appear on hover */}
         <div
-          className="absolute top-2.5 right-2.5 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0"
           onClick={e => e.stopPropagation()}
         >
           <button
             onClick={() => onEdit(place)}
-            className="w-7 h-7 flex items-center justify-center rounded-xl
-              bg-white/80 dark:bg-[#252838]/80 backdrop-blur-sm
+            className="w-8 h-8 flex items-center justify-center rounded-xl
+              bg-white/85 dark:bg-[#1e2130]/85 backdrop-blur-sm
               text-gray-500 hover:text-primary transition-colors
-              shadow-[2px_2px_5px_rgba(0,0,0,0.15)]"
+              shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
           >
-            <Edit size={12} />
+            <Edit3 size={13} />
           </button>
           <button
             onClick={() => onDelete(place)}
-            className="w-7 h-7 flex items-center justify-center rounded-xl
-              bg-white/80 dark:bg-[#252838]/80 backdrop-blur-sm
+            className="w-8 h-8 flex items-center justify-center rounded-xl
+              bg-white/85 dark:bg-[#1e2130]/85 backdrop-blur-sm
               text-gray-500 hover:text-red-500 transition-colors
-              shadow-[2px_2px_5px_rgba(0,0,0,0.15)]"
+              shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
           >
-            <Trash2 size={12} />
+            <Trash2 size={13} />
           </button>
         </div>
       </div>
 
-      {/* ── Avatar circle ── */}
-      <div className="px-5 -mt-6 mb-3 flex items-end justify-between">
-        <div
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center
-            text-xl font-black text-primary
-            border-4 border-[#e8ecf3] dark:border-[#2b2e42]
-            ${neuInset}`}
+      {/* ══ AVATAR ══ overlaps cover */}
+      <div className="px-5 flex items-end -mt-6 mb-2">
+        <div className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center
+          text-lg font-black border-[3px] border-[#e8ecf3] dark:border-[#2b2e42]
+          shrink-0 ${neuInset} text-primary`}
         >
-          {initial}
-        </div>
-
-        {/* Rating badge */}
-        <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full ${neuSmall}`}>
-          <Star size={11} className="fill-orange-400 text-orange-400" />
-          <span className="text-xs font-bold text-gray-600 dark:text-gray-300">
-            {place.rating > 0 ? place.rating.toFixed(1) : '—'}
-          </span>
+          {hasCover ? initial : <span className={catCls.split(' ').slice(-1)[0]}>{initial}</span>}
         </div>
       </div>
 
-      {/* ── Body ── */}
-      <div className="px-5 pb-5 flex flex-col gap-3 flex-1">
+      {/* ══ BODY ══ */}
+      <div className="px-5 pb-4 flex flex-col gap-2.5 flex-1">
 
-        {/* Name + Category */}
+        {/* Name */}
         <div>
-          <h3 className="font-black text-gray-700 dark:text-white text-base leading-tight">
+          <h3 className="font-black text-[15px] text-gray-800 dark:text-white leading-snug">
             {place.name}
           </h3>
+
+          {/* Category pill */}
           {place.categoryName && (
-            <span className={`inline-block mt-1 text-[10px] px-2.5 py-0.5 rounded-full font-semibold text-primary ${neuInset}`}>
-              {place.categoryName}
+            <span className={`inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${catCls}`}>
+              <Tag size={8} /> {place.categoryName}
             </span>
           )}
         </div>
 
         {/* Description */}
-        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 flex-1">
+        <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 flex-1">
           {place.description || 'No description provided.'}
         </p>
 
-        {/* Tags row */}
-        <div className="flex flex-wrap gap-1.5 pt-1 border-t border-gray-200/50 dark:border-gray-700/30">
-          <span className={`flex items-center gap-1 text-[10px] text-gray-500 px-2.5 py-1 rounded-full ${neuSmall}`}>
-            <MapPin size={9} className="text-primary" />
-            {place.latitude.toFixed(3)}, {place.longitude.toFixed(3)}
-          </span>
-          {firstHour && (
-            <span className={`flex items-center gap-1 text-[10px] text-gray-500 px-2.5 py-1 rounded-full ${neuSmall}`}>
-              <Clock size={9} className="text-primary" />
-              {firstHour.openTime} – {firstHour.closeTime}
+        {/* ── Footer row ── */}
+        <div className="pt-2.5 mt-auto border-t border-black/[0.05] dark:border-white/[0.06] flex items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-1.5 min-w-0">
+            {/* Coordinates */}
+            <span className={`inline-flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 px-2 py-1 rounded-full ${neuSmall} shrink-0`}>
+              <MapPin size={9} className="text-primary shrink-0" />
+              <span className="truncate max-w-[90px]">
+                {place.latitude.toFixed(2)}, {place.longitude.toFixed(2)}
+              </span>
             </span>
-          )}
+
+            {/* Hours */}
+            {todayHours && (
+              <span className={`inline-flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 px-2 py-1 rounded-full ${neuSmall}`}>
+                <Clock size={9} className="text-primary shrink-0" />
+                {todayHours.openTime}–{todayHours.closeTime}
+              </span>
+            )}
+          </div>
+
+          {/* View arrow */}
+          <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${neuSmall}
+            text-gray-400 group-hover:text-primary transition-colors`}>
+            <ChevronRight size={13} />
+          </div>
         </div>
       </div>
     </motion.div>
@@ -212,8 +225,9 @@ const DashboardPlaces = () => {
       toast.success('Place deleted');
       setPlaces(prev => prev.filter(p => p.id !== deletingPlace.id));
       setDeletingPlace(null);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to delete place');
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || 'Failed to delete place');
     } finally {
       setIsDeleting(false);
     }
