@@ -269,3 +269,25 @@
       -2px -2px 4px var(--neu-s2);
   }
 }
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #fe5d17, #f59e0b);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #e04d0d, #d97706);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #fe5d17 transparent;
+}
