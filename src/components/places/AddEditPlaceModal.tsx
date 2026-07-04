@@ -144,7 +144,7 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
   return (
     <>
       <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-        <div className={`${neu} rounded-[2rem] p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}>
+        <div className={`${neu} rounded-[2rem] p-6 w-full max-w-5xl max-h-[92vh] overflow-y-auto`}>
 
           {/* Header */}
           <div className="flex items-center justify-between mb-5">
@@ -157,37 +157,16 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* Name */}
-            <div className={`flex items-center gap-3 px-5 py-1 rounded-full ${neuInset}`}>
-              <MapPin size={15} className="text-gray-400 shrink-0" />
-              <input
-                required value={formData.name}
-                onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                placeholder="Place Name *"
-                className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 py-3"
-              />
-            </div>
+            {/* ── Row 1: Cover (left) + Basic info (right) ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5 items-start">
 
-            {/* Description */}
-            <div className={`px-5 py-3 rounded-2xl ${neuInset}`}>
-              <textarea
-                required rows={3} value={formData.description}
-                onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
-                placeholder="Description *"
-                className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 resize-none"
-              />
-            </div>
-
-            {/* Cover Image */}
-            <div className="space-y-2">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
-                Cover Image (optional)
-              </p>
-
-              {/* Preview / Upload Zone */}
-              <div className="relative">
+              {/* Cover Image — left column */}
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
+                  Cover Image
+                </p>
                 <input
                   type="file"
                   accept="image/*"
@@ -197,21 +176,19 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
                 />
 
                 {coverPreview ? (
-                  /* ── Image Preview ── */
                   <div className={`relative rounded-2xl overflow-hidden ${neuInset} p-1`}>
                     <img
                       src={coverPreview}
                       alt="Cover preview"
-                      className="w-full h-36 object-cover rounded-xl"
+                      className="w-full h-44 lg:h-52 object-cover rounded-xl"
                     />
-                    <div className="absolute top-3 right-3 flex gap-1.5">
+                    <div className="absolute top-2 right-2 flex gap-1.5">
                       <label
                         htmlFor="cover-file-input"
                         className="w-7 h-7 flex items-center justify-center rounded-lg cursor-pointer
                           bg-white/80 dark:bg-[#252838]/80 backdrop-blur-sm
                           text-gray-500 hover:text-primary transition-colors
                           shadow-[2px_2px_5px_rgba(0,0,0,0.15)]"
-                        title="Change image"
                       >
                         <UploadCloud size={13} />
                       </label>
@@ -222,82 +199,95 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
                           bg-white/80 dark:bg-[#252838]/80 backdrop-blur-sm
                           text-gray-500 hover:text-red-500 transition-colors
                           shadow-[2px_2px_5px_rgba(0,0,0,0.15)]"
-                        title="Remove image"
                       >
                         <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
                 ) : (
-                  /* ── Upload Zone ── */
                   <label
                     htmlFor="cover-file-input"
-                    className={`flex flex-col items-center justify-center gap-2 w-full h-28
+                    className={`flex flex-col items-center justify-center gap-2 w-full h-44 lg:h-52
                       rounded-2xl cursor-pointer transition-all border-2 border-dashed
-                      border-gray-300 dark:border-gray-600 hover:border-primary
-                      ${neuInset}`}
+                      border-gray-300 dark:border-gray-600 hover:border-primary ${neuInset}`}
                   >
-                    <UploadCloud size={24} className="text-gray-400" />
-                    <span className="text-xs text-gray-400 font-medium">
-                      Click to upload cover image
+                    <UploadCloud size={22} className="text-gray-400" />
+                    <span className="text-xs text-gray-400 font-medium text-center px-2">
+                      Upload cover image
                     </span>
-                    <span className="text-[10px] text-gray-300 dark:text-gray-600">
-                      PNG, JPG, WEBP
-                    </span>
+                    <span className="text-[10px] text-gray-300 dark:text-gray-600">PNG, JPG, WEBP</span>
                   </label>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setUrlMode(p => !p)}
+                  className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-primary transition-colors px-1"
+                >
+                  <Link2 size={11} />
+                  {urlMode ? 'Hide URL' : 'Or use image URL'}
+                </button>
+                {urlMode && (
+                  <div className={`flex items-center gap-2 px-3 py-2 rounded-full ${neuInset}`}>
+                    <Link2 size={12} className="text-gray-400 shrink-0" />
+                    <input
+                      value={formData.coverImage.startsWith('data:') ? '' : formData.coverImage}
+                      onChange={e => handleCoverUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="flex-1 bg-transparent outline-none text-xs text-gray-700 dark:text-white placeholder-gray-400"
+                    />
+                  </div>
                 )}
               </div>
 
-              {/* URL toggle */}
-              <button
-                type="button"
-                onClick={() => setUrlMode(p => !p)}
-                className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-primary transition-colors px-1"
-              >
-                <Link2 size={11} />
-                {urlMode ? 'Hide URL input' : 'Or enter image URL instead'}
-              </button>
-
-              {urlMode && (
-                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-full ${neuInset}`}>
-                  <Link2 size={13} className="text-gray-400 shrink-0" />
+              {/* Basic fields — right column */}
+              <div className="space-y-3">
+                <div className={`flex items-center gap-3 px-5 py-1 rounded-full ${neuInset}`}>
+                  <MapPin size={15} className="text-gray-400 shrink-0" />
                   <input
-                    value={formData.coverImage.startsWith('data:') ? '' : formData.coverImage}
-                    onChange={e => handleCoverUrl(e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                    className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400"
+                    required value={formData.name}
+                    onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                    placeholder="Place Name *"
+                    className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 py-3"
                   />
                 </div>
-              )}
+
+                <div className={`px-5 py-3 rounded-2xl ${neuInset}`}>
+                  <textarea
+                    required rows={3} value={formData.description}
+                    onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
+                    placeholder="Description *"
+                    className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 resize-none"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryPicker(true)}
+                  className={`w-full flex items-center justify-between px-5 py-3 rounded-full text-sm transition-all ${neuInset}`}
+                >
+                  <span className={formData.categoryName ? 'text-gray-700 dark:text-white font-semibold' : 'text-gray-400'}>
+                    {formData.categoryName || (isEdit ? `Current: ${place?.categoryName}` : 'Select Category *')}
+                  </span>
+                  <span className="text-primary text-xs font-bold">CHANGE →</span>
+                </button>
+              </div>
             </div>
 
-            {/* Category Picker */}
-            <button
-              type="button"
-              onClick={() => setShowCategoryPicker(true)}
-              className={`w-full flex items-center justify-between px-5 py-3.5 rounded-full text-sm transition-all ${neuInset}`}
-            >
-              <span className={formData.categoryName ? 'text-gray-700 dark:text-white font-semibold' : 'text-gray-400'}>
-                {formData.categoryName || (isEdit ? `Current: ${place?.categoryName}` : 'Select Category *')}
-              </span>
-              <span className="text-primary text-xs font-bold">CHANGE →</span>
-            </button>
-
-            {/* Opening Hours */}
+            {/* ── Row 2: Opening Hours (horizontal grid) ── */}
             <div className={`${neuInset} rounded-2xl p-4`}>
               <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Clock size={13} className="text-primary" /> Opening Hours
               </p>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
                 {ALL_DAYS.map(({ day, label }) => {
                   const schedule = hoursMap[day];
                   return (
-                    <div key={day} className="flex items-center gap-3">
-                      {/* Day toggle pill */}
+                    <div key={day} className="flex items-center gap-2 min-w-0">
                       <button
                         type="button"
                         onClick={() => toggleDay(day)}
-                        className={`w-10 text-[11px] font-bold py-1.5 rounded-full transition-all shrink-0
+                        className={`w-9 text-[10px] font-bold py-1.5 rounded-full transition-all shrink-0
                           ${schedule.enabled
                             ? 'bg-gradient-to-r from-primary to-orange-500 text-white shadow-[2px_2px_5px_rgba(0,0,0,0.15)]'
                             : `text-gray-400 ${neuSmall}`
@@ -305,26 +295,24 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
                       >
                         {label}
                       </button>
-
-                      {/* Time inputs — shown only when day is enabled */}
                       {schedule.enabled ? (
-                        <div className="flex items-center gap-2 flex-1">
+                        <div className="flex items-center gap-1 flex-1 min-w-0">
                           <input
                             type="time"
                             value={schedule.openTime}
                             onChange={e => updateHour(day, 'openTime', e.target.value)}
-                            className={`flex-1 px-3 py-1.5 rounded-xl text-xs text-gray-700 dark:text-white bg-transparent outline-none ${neuSmall}`}
+                            className={`flex-1 min-w-0 px-2 py-1.5 rounded-xl text-[11px] text-gray-700 dark:text-white bg-transparent outline-none ${neuSmall}`}
                           />
-                          <span className="text-gray-400 text-xs shrink-0">–</span>
+                          <span className="text-gray-400 text-[10px] shrink-0">–</span>
                           <input
                             type="time"
                             value={schedule.closeTime}
                             onChange={e => updateHour(day, 'closeTime', e.target.value)}
-                            className={`flex-1 px-3 py-1.5 rounded-xl text-xs text-gray-700 dark:text-white bg-transparent outline-none ${neuSmall}`}
+                            className={`flex-1 min-w-0 px-2 py-1.5 rounded-xl text-[11px] text-gray-700 dark:text-white bg-transparent outline-none ${neuSmall}`}
                           />
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-400 italic">Closed</span>
+                        <span className="text-[11px] text-gray-400 italic">Closed</span>
                       )}
                     </div>
                   );
@@ -332,40 +320,43 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
               </div>
             </div>
 
-            {/* Use Current Location */}
-            <button
-              type="button" onClick={handleUseLocation} disabled={locating}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold text-white
-                bg-gradient-to-r from-primary to-orange-500
-                shadow-[3px_3px_8px_#b8bec7,-1px_-1px_4px_#ffffff] dark:shadow-[3px_3px_8px_#12151f]
-                hover:opacity-90 disabled:opacity-60 transition-all"
-            >
-              {locating ? <Loader size={14} className="animate-spin" /> : <Navigation size={14} />}
-              {locating ? 'Detecting...' : 'Use Current Location'}
-            </button>
+            {/* ── Row 3: Map + Location (horizontal) ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-4 items-start">
+              <div className={`rounded-2xl overflow-hidden ${neuInset} p-2`}>
+                <LocationPicker
+                  onLocationSelect={(lat, lng) => setFormData(p => ({ ...p, latitude: lat, longitude: lng }))}
+                  defaultLat={formData.latitude} defaultLng={formData.longitude} flyTo={flyTo}
+                />
+              </div>
 
-            {/* Map */}
-            <div className={`rounded-2xl overflow-hidden ${neuInset} p-2`}>
-              <LocationPicker
-                onLocationSelect={(lat, lng) => setFormData(p => ({ ...p, latitude: lat, longitude: lng }))}
-                defaultLat={formData.latitude} defaultLng={formData.longitude} flyTo={flyTo}
-              />
-            </div>
-
-            {/* Coords display */}
-            <div className="grid grid-cols-2 gap-3">
-              {[['Latitude', formData.latitude], ['Longitude', formData.longitude]].map(([label, val]) => (
-                <div key={label as string} className={`px-4 py-2.5 rounded-xl ${neuInset}`}>
-                  <p className="text-[10px] text-gray-400 mb-0.5">{label as string}</p>
-                  <p className="text-sm font-mono font-semibold text-gray-700 dark:text-white">
-                    {(val as number).toFixed(6)}
+              <div className="space-y-3">
+                <button
+                  type="button" onClick={handleUseLocation} disabled={locating}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold text-white
+                    bg-gradient-to-r from-primary to-orange-500
+                    shadow-[3px_3px_8px_#b8bec7,-1px_-1px_4px_#ffffff] dark:shadow-[3px_3px_8px_#12151f]
+                    hover:opacity-90 disabled:opacity-60 transition-all"
+                >
+                  {locating ? <Loader size={14} className="animate-spin" /> : <Navigation size={14} />}
+                  {locating ? 'Detecting...' : 'Use My Location'}
+                </button>
+                <div className={`px-4 py-2.5 rounded-xl ${neuInset}`}>
+                  <p className="text-[10px] text-gray-400 mb-0.5">Latitude</p>
+                  <p className="text-xs font-mono font-semibold text-gray-700 dark:text-white">
+                    {formData.latitude.toFixed(6)}
                   </p>
                 </div>
-              ))}
+                <div className={`px-4 py-2.5 rounded-xl ${neuInset}`}>
+                  <p className="text-[10px] text-gray-400 mb-0.5">Longitude</p>
+                  <p className="text-xs font-mono font-semibold text-gray-700 dark:text-white">
+                    {formData.longitude.toFixed(6)}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-3 pt-1 border-t border-gray-200/40 dark:border-gray-700/30">
               <button
                 type="button" onClick={onClose}
                 className={`px-5 py-2.5 rounded-full text-sm font-semibold text-gray-500 ${neu} transition-all`}
@@ -374,7 +365,7 @@ const AddEditPlaceModal = ({ place, businessId, onSubmit, onClose }: Props) => {
               </button>
               <button
                 type="submit" disabled={isSubmitting}
-                className="px-5 py-2.5 rounded-full text-sm font-bold text-white
+                className="px-6 py-2.5 rounded-full text-sm font-bold text-white
                   bg-gradient-to-r from-primary to-orange-500
                   shadow-[3px_3px_8px_#b8bec7,-1px_-1px_4px_#ffffff] dark:shadow-[3px_3px_8px_#12151f]
                   hover:opacity-90 disabled:opacity-50 transition-all"
