@@ -77,15 +77,7 @@ const PlaceCard = ({ place, index, onEdit, onDelete, onClick }: PlaceCardProps) 
           </div>
         )}
 
-        {/* Rating — always visible, top-left */}
-        <div className="absolute top-3 left-3">
-          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold backdrop-blur-sm
-            ${hasRating ? 'bg-amber-400/90 text-white shadow-md' : 'bg-black/30 text-white/70'}`}>
-            <Star size={10} className={hasRating ? 'fill-white text-white' : 'text-white/60'} />
-            {hasRating ? place.rating.toFixed(1) : 'No rating'}
-          </div>
-        </div>
-
+        
         {/* Action buttons — top-right, appear on hover */}
         <div
           className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0"

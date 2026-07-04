@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  ArrowLeft, MapPin, Star, Edit, Clock, MessageSquare,
-  Heart, Plus, Trash2, Loader, Info, CalendarDays, Tag,
+  ArrowLeft, MapPin, Star, Edit, Clock,
+  Loader, Info, StarIcon,
 } from 'lucide-react';
 import { placesAPI, Place, CreatePlaceRequest } from '@/services/placesService';
-import EventsTab from '@/components/places/EventsTab';
-import OffersTab from '@/components/places/OffersTab';
-import PostCommentsModal from '@/components/places/PostCommentsModal';
-import DeleteConfirmModal from '@/components/places/DeleteConfirmModal';
+import { reviewsAPI, Review } from '@/services/reviewsService';
+import ReviewCard from '@/components/places/ReviewCard';
 import AddEditPlaceModal from '@/components/places/AddEditPlaceModal';
 import { useAppSelector } from '@/store/hooks';
 import { toast } from 'sonner';
@@ -18,10 +16,11 @@ const neuCard = "bg-[#e0e5ec] shadow-[6px_6px_14px_#b8bec7,-6px_-6px_14px_#fffff
 const neuSmall = "bg-[#e0e5ec] shadow-[3px_3px_7px_#b8bec7,-3px_-3px_7px_#ffffff] dark:bg-[#252838] dark:shadow-[3px_3px_6px_#12151f,-3px_-3px_6px_#2e3248]";
 const neuInset = "bg-[#e0e5ec] shadow-[inset_4px_4px_8px_#b8bec7,inset_-4px_-4px_8px_#ffffff] dark:bg-[#252838] dark:shadow-[inset_3px_3px_7px_#12151f,inset_-3px_-3px_7px_#2e3248]";
 
-type Tab = 'info' ;
+type Tab = 'info' | 'reviews';
 
 const TABS: { id: Tab; label: string; icon: typeof Info }[] = [
-  { id: 'info',  label: 'Info',  icon: Info },
+  { id: 'info',    label: 'Info',    icon: Info },
+  { id: 'reviews', label: 'Reviews', icon: Star },
 ];
 
 const DAYS: Record<number, string> = {
@@ -42,14 +41,8 @@ const PlaceProfilePage = () => {
   const [activeTab, setActiveTab] = useState<Tab>('info');
   const [showEditModal, setShowEditModal] = useState(false);
 
-
-  const [showAddPost, setShowAddPost] = useState(false);
-  const [postContent, setPostContent] = useState('');
-  const [postAttachments, setPostAttachments] = useState('');
-  const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [deletingPost, setDeletingPost] = useState<Post | null>(null);
-  const [viewingPost, setViewingPost] = useState<Post | null>(null);
-  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -58,6 +51,19 @@ const PlaceProfilePage = () => {
       .catch(() => { toast.error('Place not found'); navigate(-1); })
       .finally(() => setIsLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    setReviewsLoading(true);
+    reviewsAPI.getByPlace(id)
+      .then(res => setReviews(res.data))
+      .catch(() => {})
+      .finally(() => setReviewsLoading(false));
+  }, [id]);
+
+  const avgRating = reviews.length
+    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+    : 0;
 
 
 
@@ -106,7 +112,7 @@ const PlaceProfilePage = () => {
         >
           {/* Cover Photo */}
           <div
-            className="w-full h-52 rounded-[2rem] overflow-hidden"
+            className="w-full h-72 rounded-[2rem] overflow-hidden"
             style={hasCover
               ? { backgroundImage: `url(${place.coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
               : {}
@@ -137,40 +143,38 @@ const PlaceProfilePage = () => {
 
           {/* Profile Circle */}
           <div className="absolute -bottom-10 left-6">
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center
+            <div className={`w-20 h-20 rounded-full overflow-hidden flex items-center justify-center
               bg-[#e0e5ec] dark:bg-[#252838]
               shadow-[5px_5px_12px_#b8bec7,-5px_-5px_12px_#ffffff]
               dark:shadow-[5px_5px_12px_#0e1020,-5px_-5px_12px_#343750]
               border-4 border-[#e0e5ec] dark:border-[#252838]`}
             >
-              <span className="text-3xl font-black text-primary">{initial}</span>
+              <img src="/bazooka.jpg" alt={place.name} className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
 
-        {/* ── Place Name + Meta ── */}
-        <div className="pl-28 mb-6 flex items-end justify-between">
+        {/* ── Place Name + Meta + Location ── */}
+        <div className="pl-28 mb-6 flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-black text-gray-700 dark:text-white leading-tight">
               {place.name}
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-1.5">
-              <span className={`text-xs px-3 py-1 rounded-full font-semibold text-primary ${neuInset}`}>
-                {place.categoryName}
-              </span>
-              <span className={`flex items-center gap-1 text-xs text-gray-500 px-3 py-1 rounded-full ${neuSmall}`}>
-                <Star size={10} className="text-orange-400 fill-orange-400" />
-                {place.rating > 0 ? place.rating.toFixed(1) : 'No ratings'}
+              {place.categoryName && (
+                <span className={`text-xs px-3 py-1 rounded-full font-semibold text-primary ${neuInset}`}>
+                  {place.categoryName}
+                </span>
+              )}
+              <span className={`inline-flex items-center gap-1.5 text-xs text-gray-500 px-3 py-1 rounded-full ${neuSmall}`}>
+                <MapPin size={11} className="text-primary" />
+                {place.latitude.toFixed(5)}, {place.longitude.toFixed(5)}
               </span>
             </div>
           </div>
-        </div>
-
-        {/* Location badge */}
-        <div className="mb-6">
-          <span className={`inline-flex items-center gap-1.5 text-xs text-gray-500 px-3 py-1.5 rounded-full ${neuSmall}`}>
-            <MapPin size={11} className="text-primary" />
-            {place.latitude.toFixed(5)}, {place.longitude.toFixed(5)}
+          <span className={`flex items-center gap-1 text-xs text-gray-500 px-3 py-1.5 rounded-full ${neuSmall}`}>
+            <Star size={10} className="text-orange-400 fill-orange-400" />
+            {avgRating > 0 ? `${avgRating.toFixed(1)} (${reviews.length})` : 'No ratings'}
           </span>
         </div>
 
@@ -229,6 +233,59 @@ const PlaceProfilePage = () => {
           </motion.div>
         )}
 
+        {/* REVIEWS */}
+        {activeTab === 'reviews' && (
+          <motion.div key="reviews" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+
+            {/* Average rating summary */}
+            {!reviewsLoading && reviews.length > 0 && (
+              <div className={`${neuCard} rounded-2xl p-5 flex items-center justify-between`}>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Customer Reviews
+                  </p>
+                  <p className="text-sm text-gray-400 mt-0.5">
+                    {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-black text-gray-700 dark:text-white">
+                    {(reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)}
+                  </span>
+                  <Star size={20} className="fill-orange-400 text-orange-400" />
+                </div>
+              </div>
+            )}
+
+            {reviewsLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader className="animate-spin text-primary" size={32} />
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className={`${neuCard} rounded-2xl p-12 text-center`}>
+                <StarIcon size={36} className="text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-400 font-medium">No reviews yet</p>
+                <p className="text-sm text-gray-300 dark:text-gray-600 mt-1">
+                  Reviews from customers will appear here
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {reviews.map((review, i) => (
+                  <motion.div
+                    key={review.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                  >
+                    <ReviewCard review={review} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
       </div>
 
       {/* Modals */}
@@ -240,14 +297,6 @@ const PlaceProfilePage = () => {
           onClose={() => setShowEditModal(false)}
         />
       )}
-
-      
-
-      <AnimatePresence>
-        {viewingPost && (
-          <PostCommentsModal post={viewingPost} onClose={() => setViewingPost(null)} />
-        )}
-      </AnimatePresence>
     </div>
   );
 };
