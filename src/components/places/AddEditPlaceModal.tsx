@@ -20,7 +20,7 @@ const ALL_DAYS = [
   { day: 1, label: 'Mon' }, { day: 2, label: 'Tue' },
   { day: 3, label: 'Wed' }, { day: 4, label: 'Thu' },
   { day: 5, label: 'Fri' }, { day: 6, label: 'Sat' },
-  { day: 7, label: 'Sun' },
+  { day: 0, label: 'Sun' },
 ];
 
 type DaySchedule = { enabled: boolean; openTime: string; closeTime: string };
