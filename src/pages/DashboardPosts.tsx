@@ -240,7 +240,7 @@ const DashboardPosts = () => {
 
           <div className={`px-4 py-3 rounded-2xl ${neuInset}`}>
             <textarea
-              autoFocus  rows={4}
+              autoFocus required rows={4}
               value={content}
               onChange={e => setContent(e.target.value)}
               placeholder="What's on your mind?"
