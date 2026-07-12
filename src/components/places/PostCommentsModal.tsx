@@ -79,11 +79,22 @@ const PostCommentsModal = ({ post, onClose }: Props) => {
         </div>
 
         {/* Post Preview */}
-        <div className={`mx-5 mb-4 p-4 rounded-2xl ${neuInset} shrink-0`}>
-          <p className="text-sm text-gray-700 dark:text-white leading-relaxed line-clamp-3">
+        <div className={`mx-5 mb-4 p-4 rounded-2xl ${neuInset} shrink-0 space-y-3`}>
+          {post.postAttachments?.startsWith('http') && (
+            <img
+              src={post.postAttachments}
+              alt=""
+              className="w-full h-40 object-cover rounded-xl"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.currentTarget.parentElement as HTMLElement | null)?.classList.add('hidden');
+              }}
+            />
+          )}
+          <p className="text-sm text-gray-700 dark:text-white leading-relaxed line-clamp-3 whitespace-pre-line">
             {post.content}
           </p>
-          <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+          <div className="flex items-center gap-3 text-xs text-gray-400">
             <span className="flex items-center gap-1">
               <Heart size={10} className="text-rose-400" /> {post.likesCount}
             </span>

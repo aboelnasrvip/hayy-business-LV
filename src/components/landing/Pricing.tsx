@@ -4,7 +4,10 @@ import { Check, Sparkles, Loader, AlertCircle, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { fetchSubscriptionPlans, selectPlan } from "@/store/slices/paymentSlice";
+import {
+  fetchSubscriptionPlans,
+  selectPlan,
+} from "@/store/slices/paymentSlice";
 import { SubscriptionPlan } from "@/services/paymentService";
 import { toast } from "sonner";
 
@@ -65,8 +68,12 @@ const SkeletonCard = () => (
     <div className={`h-5 w-2/3 rounded-full ${neuInset}`} />
     <div className={`h-16 rounded-2xl ${neuInset}`} />
     <div className="space-y-2.5">
-      {[1, 2, 3, 4].map(i => (
-        <div key={i} className={`h-4 rounded-full ${neuInset}`} style={{ width: `${70 + i * 5}%` }} />
+      {[1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className={`h-4 rounded-full ${neuInset}`}
+          style={{ width: `${70 + i * 5}%` }}
+        />
       ))}
     </div>
     <div className={`h-11 rounded-2xl ${neuInset} mt-auto`} />
@@ -78,9 +85,9 @@ const Pricing = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const { plans, isLoading, error } = useAppSelector(s => s.payment);
+  const { plans, isLoading, error } = useAppSelector((s) => s.payment);
   const { isAuthenticated, hasActiveSubscription, verificationStatus } =
-    useAppSelector(s => s.auth);
+    useAppSelector((s) => s.auth);
 
   useEffect(() => {
     dispatch(fetchSubscriptionPlans());
@@ -136,7 +143,6 @@ const Pricing = () => {
       dir={direction}
     >
       <div className="container mx-auto max-w-6xl">
-
         {/* ── Header ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -145,7 +151,9 @@ const Pricing = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-5 ${neuSmall}`}>
+          <div
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-5 ${neuSmall}`}
+          >
             <Sparkles size={14} className="text-primary" />
             <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
               {t("pricing.badge")}
@@ -171,7 +179,9 @@ const Pricing = () => {
           >
             <div className="flex items-center justify-center gap-2 mb-4 text-red-500">
               <AlertCircle size={20} />
-              <span className="text-sm font-semibold">Failed to load plans</span>
+              <span className="text-sm font-semibold">
+                Failed to load plans
+              </span>
             </div>
             <button
               onClick={() => dispatch(fetchSubscriptionPlans())}
@@ -188,7 +198,9 @@ const Pricing = () => {
         {/* ── Skeleton Loading ── */}
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+            {[1, 2, 3].map((i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
         )}
 
@@ -197,7 +209,7 @@ const Pricing = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
             {plans.map((plan, index) => {
               const isPopular = index === Math.floor(plans.length / 2);
-              const features  = getTierFeatures(plan.aiPowerLevel);
+              const features = getTierFeatures(plan.aiPowerLevel);
 
               return (
                 <motion.div
@@ -214,18 +226,21 @@ const Pricing = () => {
                   {/* Accent top line */}
                   <div
                     className={`absolute top-0 left-6 right-6 h-[3px] rounded-full
-                      ${isPopular
-                        ? "bg-gradient-to-r from-primary to-orange-400"
-                        : "bg-gray-200/60 dark:bg-white/5"
+                      ${
+                        isPopular
+                          ? "bg-gradient-to-r from-primary to-orange-400"
+                          : "bg-gray-200/60 dark:bg-white/5"
                       }`}
                   />
 
                   {/* Popular badge */}
                   {isPopular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full
+                      <div
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full
                         bg-gradient-to-r from-primary to-orange-500 text-white text-xs font-bold
-                        shadow-[3px_3px_8px_#adb5c0]">
+                        shadow-[3px_3px_8px_#adb5c0]"
+                      >
                         <Sparkles size={11} />
                         Most Popular
                       </div>
@@ -237,11 +252,15 @@ const Pricing = () => {
                     <h3 className="text-lg font-bold text-gray-700 dark:text-white mb-1">
                       {plan.name}
                     </h3>
-                    <p className="text-xs text-gray-400 leading-relaxed">{plan.description}</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      {plan.description}
+                    </p>
                   </div>
 
                   {/* Price block */}
-                  <div className={`mb-5 px-5 py-4 rounded-2xl text-center ${neuInset}`}>
+                  <div
+                    className={`mb-5 px-5 py-4 rounded-2xl text-center ${neuInset}`}
+                  >
                     <div className="flex items-baseline justify-center gap-1">
                       <span className="text-3xl font-black text-gray-700 dark:text-white">
                         {plan.price.toLocaleString()}
@@ -249,12 +268,15 @@ const Pricing = () => {
                       <span className="text-sm text-gray-400">EGP</span>
                     </div>
                     <p className="text-xs text-gray-400 mt-1">
-                      for {plan.durationDays} day{plan.durationDays !== 1 ? "s" : ""}
+                      for {plan.durationDays} day
+                      {plan.durationDays !== 1 ? "s" : ""}
                     </p>
                   </div>
 
                   {/* AI Power Level */}
-                  <div className={`flex items-center justify-between px-4 py-3 rounded-2xl mb-5 ${neuSmall}`}>
+                  <div
+                    className={`flex items-center justify-between px-4 py-3 rounded-2xl mb-5 ${neuSmall}`}
+                  >
                     <div className="flex items-center gap-2">
                       <Zap size={13} className="text-primary" />
                       <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
@@ -266,13 +288,17 @@ const Pricing = () => {
 
                   {/* Features */}
                   <ul className="space-y-2.5 mb-8 flex-1">
-                    {features.map(feat => (
+                    {features.map((feat) => (
                       <li key={feat} className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-orange-400
-                          flex items-center justify-center shrink-0 mt-0.5">
+                        <div
+                          className="w-5 h-5 rounded-full bg-gradient-to-br from-primary to-orange-400
+                          flex items-center justify-center shrink-0 mt-0.5"
+                        >
                           <Check size={11} className="text-white" />
                         </div>
-                        <span className="text-sm text-gray-600 dark:text-gray-300">{feat}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                          {feat}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -282,9 +308,10 @@ const Pricing = () => {
                     onClick={() => handleSelectPlan(plan)}
                     disabled={!plan.isActive}
                     className={`w-full py-3 rounded-2xl text-sm font-bold transition-all mt-auto
-                      ${isPopular
-                        ? "text-white bg-gradient-to-r from-primary to-orange-500 shadow-[4px_4px_10px_#adb5c0,-2px_-2px_6px_#ffffff] dark:shadow-[4px_4px_10px_#0e1020] hover:opacity-90"
-                        : `text-gray-600 dark:text-gray-300 hover:text-primary ${neuSmall}`
+                      ${
+                        isPopular
+                          ? "text-white bg-gradient-to-r from-primary to-orange-500 shadow-[4px_4px_10px_#adb5c0,-2px_-2px_6px_#ffffff] dark:shadow-[4px_4px_10px_#0e1020] hover:opacity-90"
+                          : `text-gray-600 dark:text-gray-300 hover:text-primary ${neuSmall}`
                       }
                       disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
@@ -298,7 +325,9 @@ const Pricing = () => {
 
         {/* ── Empty (no plans) ── */}
         {!isLoading && !error && plans.length === 0 && (
-          <p className="text-center text-gray-400 text-sm">No plans available at the moment.</p>
+          <p className="text-center text-gray-400 text-sm">
+            No plans available at the moment.
+          </p>
         )}
       </div>
     </section>

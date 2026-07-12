@@ -13,7 +13,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.badge": "AI-Powered Business Growth Platform",
     "hero.title": "Grow Your Business with",
     "hero.titleHighlight": "Real Customer Engagement",
-    "hero.subtitle": "HAYY connects your business directly with real customers. Manage posts, engage with comments, and watch your brand grow with AI-powered tools.",
+    "hero.subtitle":
+      "HAYY connects your business directly with real customers. Manage posts, engage with comments, and watch your brand grow with AI-powered tools.",
     "hero.cta": "Start Free Trial",
     "hero.secondaryCta": "Watch Demo",
     "hero.stat.businesses": "Active Businesses",
@@ -24,31 +25,42 @@ export const translations: Record<Language, Record<string, string>> = {
     "features.badge": "Features",
     "features.title": "Everything You Need to ",
     "features.titleHighlight": "Grow Your Business",
-    "features.subtitle": "Powerful tools designed specifically for business owners to manage their online presence and connect with real customers.",
+    "features.subtitle":
+      "Powerful tools designed specifically for business owners to manage their online presence and connect with real customers.",
     "features.ai.title": "AI-Powered Growth",
-    "features.ai.description": "Smart algorithms analyze your audience and optimize content for maximum engagement.",
+    "features.ai.description":
+      "Smart algorithms analyze your audience and optimize content for maximum engagement.",
     "features.comments.title": "Comment Management",
-    "features.comments.description": "Easily manage, respond to, and moderate customer comments and reviews.",
+    "features.comments.description":
+      "Easily manage, respond to, and moderate customer comments and reviews.",
     "features.analytics.title": "Real-Time Analytics",
-    "features.analytics.description": "Track your business performance with detailed insights and growth metrics.",
+    "features.analytics.description":
+      "Track your business performance with detailed insights and growth metrics.",
     "features.branding.title": "Brand Customization",
-    "features.branding.description": "Set your brand colors, logos, and style to create a consistent identity.",
+    "features.branding.description":
+      "Set your brand colors, logos, and style to create a consistent identity.",
     "features.media.title": "Media Management",
-    "features.media.description": "Upload and organize photos, videos, and posts from one central hub.",
+    "features.media.description":
+      "Upload and organize photos, videos, and posts from one central hub.",
     "features.verified.title": "Verified Business",
-    "features.verified.description": "Build trust with customers through our verified business badge program.",
+    "features.verified.description":
+      "Build trust with customers through our verified business badge program.",
     "features.smart.title": "Smart Recommendations",
-    "features.smart.description": "Get AI-powered suggestions to improve your content and reach.",
+    "features.smart.description":
+      "Get AI-powered suggestions to improve your content and reach.",
     "features.multilang.title": "Multi-Language Support",
-    "features.multilang.description": "Reach customers in Arabic, English, and more with RTL support.",
+    "features.multilang.description":
+      "Reach customers in Arabic, English, and more with RTL support.",
 
     // Pricing
     "pricing.badge": "Pricing",
     "pricing.title": "Simple, Transparent ",
     "pricing.titleHighlight": "Pricing",
-    "pricing.subtitle": "Choose the plan that fits your business. Start free, upgrade when you're ready.",
+    "pricing.subtitle":
+      "Choose the plan that fits your business. Start free, upgrade when you're ready.",
     "pricing.starter.name": "Starter",
-    "pricing.starter.description": "Perfect for new businesses just getting started",
+    "pricing.starter.description":
+      "Perfect for new businesses just getting started",
     "pricing.starter.price": "Free",
     "pricing.starter.cta": "Start Free",
     "pricing.pro.name": "Professional",
@@ -58,7 +70,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "pricing.pro.cta": "Get Started",
     "pricing.pro.popular": "Most Popular",
     "pricing.enterprise.name": "Enterprise",
-    "pricing.enterprise.description": "For established businesses with advanced needs",
+    "pricing.enterprise.description":
+      "For established businesses with advanced needs",
     "pricing.enterprise.price": "$99",
     "pricing.enterprise.period": "/month",
     "pricing.enterprise.cta": "Contact Sales",
@@ -83,7 +96,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "pricing.feature.sla": "SLA guarantee",
 
     // Footer
-    "footer.description": "Empowering business owners to grow their brand and connect with real customers through our AI-powered platform.",
+    "footer.description":
+      "Empowering business owners to grow their brand and connect with real customers through our AI-powered platform.",
     "footer.product": "Product",
     "footer.company": "Company",
     "footer.support": "Support",
@@ -118,7 +132,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "auth.register.hasAccount": "Already have an account?",
     "auth.register.signIn": "Sign in",
     "auth.register.sideTitle": "Join thousands of thriving businesses",
-    "auth.register.sideSubtitle": "Start connecting with real customers and watch your business grow with AI-powered tools designed for your success.",
+    "auth.register.sideSubtitle":
+      "Start connecting with real customers and watch your business grow with AI-powered tools designed for your success.",
 
     // Auth - Login
     "auth.login.title": "Sign in",
@@ -132,14 +147,17 @@ export const translations: Record<Language, Record<string, string>> = {
     "auth.login.noAccount": "Don't have an account?",
     "auth.login.signUp": "Create one",
     "auth.login.sideTitle": "Welcome back!",
-    "auth.login.sideSubtitle": "Access your dashboard to manage your business presence, engage with customers, and track your growth.",
+    "auth.login.sideSubtitle":
+      "Access your dashboard to manage your business presence, engage with customers, and track your growth.",
 
     // Auth - Verify Email
     "auth.verify.title": "Check your email",
-    "auth.verify.subtitle": "We've sent a verification link to your email address. Please click the link to verify your account and continue.",
+    "auth.verify.subtitle":
+      "We've sent a verification link to your email address. Please click the link to verify your account and continue.",
     "auth.verify.confirmed": "I've Verified My Email",
     "auth.verify.resend": "Resend Verification Email",
-    "auth.verify.noEmail": "Didn't receive the email? Check your spam folder or",
+    "auth.verify.noEmail":
+      "Didn't receive the email? Check your spam folder or",
     "auth.verify.contactSupport": "contact support",
 
     // Profile Setup
@@ -155,7 +173,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "profile.website": "Website (Optional)",
     "profile.websitePlaceholder": "https://yourbusiness.com",
     "profile.description": "Business Description",
-    "profile.descriptionPlaceholder": "Tell us what makes your business unique...",
+    "profile.descriptionPlaceholder":
+      "Tell us what makes your business unique...",
     "profile.logo": "Business Logo",
     "profile.logoDragDrop": "Drag and drop or",
     "profile.logoBrowse": "browse",
@@ -172,7 +191,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "profile.back": "Back",
     "profile.completeSetup": "Complete Setup",
     "profile.step3.title": "You're all set!",
-    "profile.step3.subtitle": "Your profile is complete. Our team will verify your documents within 24-48 hours.",
+    "profile.step3.subtitle":
+      "Your profile is complete. Our team will verify your documents within 24-48 hours.",
     "profile.goToDashboard": "Go to Dashboard",
 
     // Dashboard
@@ -189,7 +209,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "dashboard.viewAll": "View All",
     "dashboard.views": "views",
     "dashboard.growTitle": "Ready to grow your business?",
-    "dashboard.growSubtitle": "Create engaging content and connect with more customers today.",
+    "dashboard.growSubtitle":
+      "Create engaging content and connect with more customers today.",
     "dashboard.viewAnalytics": "View Analytics",
     "dashboard.createCampaign": "Create Campaign",
     "dashboard.signOut": "Sign Out",
@@ -232,7 +253,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "colors.currentPalette": "Current Palette:",
     "colors.previewTitle": "Acme Coffee",
     "colors.previewSubtitle": "Your Business Preview",
-    "colors.previewText": "This is how your brand will appear to customers on the HAYY platform.",
+    "colors.previewText":
+      "This is how your brand will appear to customers on the HAYY platform.",
     "colors.previewInput": "Sample input field",
     "colors.previewPrimary": "Primary Button",
     "colors.previewSecondary": "Secondary",
@@ -249,7 +271,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "hero.badge": "منصة نمو الأعمال بالذكاء الاصطناعي",
     "hero.title": "نمّي عملك مع",
     "hero.titleHighlight": "تفاعل حقيقي مع العملاء",
-    "hero.subtitle": "HAYY يربط عملك مباشرة بالعملاء الحقيقيين. أدر المنشورات وتفاعل مع التعليقات وشاهد علامتك التجارية تنمو بأدوات الذكاء الاصطناعي.",
+    "hero.subtitle":
+      "HAYY يربط عملك مباشرة بالعملاء الحقيقيين. أدر المنشورات وتفاعل مع التعليقات وشاهد علامتك التجارية تنمو بأدوات الذكاء الاصطناعي.",
     "hero.cta": "ابدأ تجربتك المجانية",
     "hero.secondaryCta": "شاهد العرض",
     "hero.stat.businesses": "الأعمال النشطة",
@@ -260,29 +283,39 @@ export const translations: Record<Language, Record<string, string>> = {
     "features.badge": "المميزات",
     "features.title": "كل ما تحتاجه ",
     "features.titleHighlight": "لتنمية عملك",
-    "features.subtitle": "أدوات قوية مصممة خصيصاً لأصحاب الأعمال لإدارة تواجدهم الرقمي والتواصل مع العملاء الحقيقيين.",
+    "features.subtitle":
+      "أدوات قوية مصممة خصيصاً لأصحاب الأعمال لإدارة تواجدهم الرقمي والتواصل مع العملاء الحقيقيين.",
     "features.ai.title": "نمو بالذكاء الاصطناعي",
-    "features.ai.description": "خوارزميات ذكية تحلل جمهورك وتحسن المحتوى لأقصى تفاعل.",
+    "features.ai.description":
+      "خوارزميات ذكية تحلل جمهورك وتحسن المحتوى لأقصى تفاعل.",
     "features.comments.title": "إدارة التعليقات",
-    "features.comments.description": "أدر التعليقات والمراجعات ورد عليها واشرف عليها بسهولة.",
+    "features.comments.description":
+      "أدر التعليقات والمراجعات ورد عليها واشرف عليها بسهولة.",
     "features.analytics.title": "تحليلات فورية",
-    "features.analytics.description": "تتبع أداء عملك مع رؤى تفصيلية ومقاييس النمو.",
+    "features.analytics.description":
+      "تتبع أداء عملك مع رؤى تفصيلية ومقاييس النمو.",
     "features.branding.title": "تخصيص العلامة التجارية",
-    "features.branding.description": "حدد ألوان علامتك التجارية وشعاراتها وأسلوبها لإنشاء هوية متسقة.",
+    "features.branding.description":
+      "حدد ألوان علامتك التجارية وشعاراتها وأسلوبها لإنشاء هوية متسقة.",
     "features.media.title": "إدارة الوسائط",
-    "features.media.description": "ارفع ونظم الصور والفيديوهات والمنشورات من مركز واحد.",
+    "features.media.description":
+      "ارفع ونظم الصور والفيديوهات والمنشورات من مركز واحد.",
     "features.verified.title": "عمل موثق",
-    "features.verified.description": "ابنِ ثقة العملاء من خلال برنامج شارة الأعمال الموثقة.",
+    "features.verified.description":
+      "ابنِ ثقة العملاء من خلال برنامج شارة الأعمال الموثقة.",
     "features.smart.title": "توصيات ذكية",
-    "features.smart.description": "احصل على اقتراحات مدعومة بالذكاء الاصطناعي لتحسين محتواك ووصولك.",
+    "features.smart.description":
+      "احصل على اقتراحات مدعومة بالذكاء الاصطناعي لتحسين محتواك ووصولك.",
     "features.multilang.title": "دعم متعدد اللغات",
-    "features.multilang.description": "تواصل مع العملاء بالعربية والإنجليزية والمزيد مع دعم RTL.",
+    "features.multilang.description":
+      "تواصل مع العملاء بالعربية والإنجليزية والمزيد مع دعم RTL.",
 
     // Pricing
     "pricing.badge": "الأسعار",
     "pricing.title": "أسعار بسيطة و",
     "pricing.titleHighlight": "شفافة",
-    "pricing.subtitle": "اختر الخطة المناسبة لعملك. ابدأ مجاناً وقم بالترقية عندما تكون جاهزاً.",
+    "pricing.subtitle":
+      "اختر الخطة المناسبة لعملك. ابدأ مجاناً وقم بالترقية عندما تكون جاهزاً.",
     "pricing.starter.name": "المبتدئ",
     "pricing.starter.description": "مثالي للأعمال الجديدة في البداية",
     "pricing.starter.price": "مجاني",
@@ -319,7 +352,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "pricing.feature.sla": "ضمان SLA",
 
     // Footer
-    "footer.description": "نمكّن أصحاب الأعمال من تنمية علامتهم التجارية والتواصل مع العملاء الحقيقيين من خلال منصتنا المدعومة بالذكاء الاصطناعي.",
+    "footer.description":
+      "نمكّن أصحاب الأعمال من تنمية علامتهم التجارية والتواصل مع العملاء الحقيقيين من خلال منصتنا المدعومة بالذكاء الاصطناعي.",
     "footer.product": "المنتج",
     "footer.company": "الشركة",
     "footer.support": "الدعم",
@@ -354,7 +388,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "auth.register.hasAccount": "لديك حساب بالفعل؟",
     "auth.register.signIn": "تسجيل الدخول",
     "auth.register.sideTitle": "انضم لآلاف الأعمال المزدهرة",
-    "auth.register.sideSubtitle": "ابدأ بالتواصل مع العملاء الحقيقيين وشاهد عملك ينمو بأدوات الذكاء الاصطناعي المصممة لنجاحك.",
+    "auth.register.sideSubtitle":
+      "ابدأ بالتواصل مع العملاء الحقيقيين وشاهد عملك ينمو بأدوات الذكاء الاصطناعي المصممة لنجاحك.",
 
     // Auth - Login
     "auth.login.title": "تسجيل الدخول",
@@ -368,11 +403,13 @@ export const translations: Record<Language, Record<string, string>> = {
     "auth.login.noAccount": "ليس لديك حساب؟",
     "auth.login.signUp": "أنشئ واحداً",
     "auth.login.sideTitle": "مرحباً بعودتك!",
-    "auth.login.sideSubtitle": "ادخل إلى لوحة التحكم لإدارة تواجد عملك والتفاعل مع العملاء وتتبع نموك.",
+    "auth.login.sideSubtitle":
+      "ادخل إلى لوحة التحكم لإدارة تواجد عملك والتفاعل مع العملاء وتتبع نموك.",
 
     // Auth - Verify Email
     "auth.verify.title": "تحقق من بريدك الإلكتروني",
-    "auth.verify.subtitle": "أرسلنا رابط التحقق إلى بريدك الإلكتروني. يرجى النقر على الرابط للتحقق من حسابك والمتابعة.",
+    "auth.verify.subtitle":
+      "أرسلنا رابط التحقق إلى بريدك الإلكتروني. يرجى النقر على الرابط للتحقق من حسابك والمتابعة.",
     "auth.verify.confirmed": "لقد تحققت من بريدي الإلكتروني",
     "auth.verify.resend": "إعادة إرسال رسالة التحقق",
     "auth.verify.noEmail": "لم تستلم الرسالة؟ تحقق من مجلد البريد المزعج أو",
@@ -408,7 +445,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "profile.back": "رجوع",
     "profile.completeSetup": "إنهاء الإعداد",
     "profile.step3.title": "كل شيء جاهز!",
-    "profile.step3.subtitle": "اكتمل ملفك الشخصي. سيتحقق فريقنا من مستنداتك خلال 24-48 ساعة.",
+    "profile.step3.subtitle":
+      "اكتمل ملفك الشخصي. سيتحقق فريقنا من مستنداتك خلال 24-48 ساعة.",
     "profile.goToDashboard": "الذهاب للوحة التحكم",
 
     // Dashboard
@@ -425,7 +463,8 @@ export const translations: Record<Language, Record<string, string>> = {
     "dashboard.viewAll": "عرض الكل",
     "dashboard.views": "مشاهدة",
     "dashboard.growTitle": "مستعد لتنمية عملك؟",
-    "dashboard.growSubtitle": "أنشئ محتوى جذاباً وتواصل مع المزيد من العملاء اليوم.",
+    "dashboard.growSubtitle":
+      "أنشئ محتوى جذاباً وتواصل مع المزيد من العملاء اليوم.",
     "dashboard.viewAnalytics": "عرض التحليلات",
     "dashboard.createCampaign": "إنشاء حملة",
     "dashboard.signOut": "تسجيل الخروج",

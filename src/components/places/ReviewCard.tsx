@@ -12,6 +12,65 @@ const neuCard = "rounded-[1.5rem] bg-[#e8ecf3] shadow-[12px_12px_24px_#adb5c0,-1
 const neuSmall = "bg-[#e0e5ec] shadow-[3px_3px_7px_#b8bec7,-3px_-3px_7px_#ffffff] dark:bg-[#252838] dark:shadow-[3px_3px_6px_#12151f,-3px_-3px_6px_#2e3248]";
 const neuInset = "bg-[#e0e5ec] shadow-[inset_4px_4px_8px_#b8bec7,inset_-4px_-4px_8px_#ffffff] dark:bg-[#252838] dark:shadow-[inset_3px_3px_7px_#12151f,inset_-3px_-3px_7px_#2e3248]";
 
+const isValidImageUrl = (url?: string) =>
+  !!url &&
+  url.trim() !== '' &&
+  url !== 'string' &&
+  (url.startsWith('http://') || url.startsWith('https://'));
+
+const parseReviewImages = (raw?: string): string[] => {
+  if (!raw || !raw.trim() || raw.trim() === 'string') return [];
+  return raw
+    .split(/[,|]/)
+    .map(s => s.trim())
+    .filter(isValidImageUrl);
+};
+
+const ReviewImage = ({ src }: { src: string }) => {
+  const [failed, setFailed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  if (failed) return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setExpanded(true)}
+        className="relative overflow-hidden rounded-xl shrink-0 h-full aspect-square
+          ring-1 ring-black/5 dark:ring-white/10 hover:ring-primary/40 transition-all"
+      >
+        <img
+          src={src}
+          alt="Review"
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
+        />
+      </button>
+
+      <AnimatePresence>
+        {expanded && (
+          <div
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={() => setExpanded(false)}
+          >
+            <motion.img
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              src={src}
+              alt="Review full"
+              className="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl"
+              onClick={e => e.stopPropagation()}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
 export const Stars = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5">
     {[1, 2, 3, 4, 5].map(i => (
@@ -110,23 +169,24 @@ const ReviewCard = ({ review }: ReviewCardProps) => {
 
   const initial = review.userName[0]?.toUpperCase() ?? '?';
   const repliesCount = replies.length;
+  const images = parseReviewImages(review.reviewImages);
 
   return (
-    <div className={`${neuCard} p-5 space-y-4`}>
+    <div className={`${neuCard} h-full p-5 flex flex-col`}>
 
-      {/* Review Header */}
-      <div className="flex items-start gap-3">
+      {/* Header — fixed */}
+      <div className="flex items-start gap-3 shrink-0">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-primary ${neuInset} shrink-0`}>
           {initial}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-bold text-gray-700 dark:text-white leading-tight">
+            <p className="text-sm font-bold text-gray-700 dark:text-white leading-tight truncate">
               {review.userName}
             </p>
             <p className="text-[10px] text-gray-400 shrink-0">
               {new Date(review.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric',
+                month: 'short', day: 'numeric', year: 'numeric',
               })}
             </p>
           </div>
@@ -136,123 +196,137 @@ const ReviewCard = ({ review }: ReviewCardProps) => {
         </div>
       </div>
 
-      {/* Review Comment */}
-      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+      {/* Comment — clamped for equal look */}
+      <p className="mt-3 text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-2 min-h-[2.75rem] shrink-0">
         {review.comment}
       </p>
 
-      {/* Reply Input */}
-      <form onSubmit={handleReply} className={`flex items-center gap-2 px-4 py-2.5 rounded-full ${neuInset}`}>
-        <input
-          value={replyText}
-          onChange={e => setReplyText(e.target.value)}
-          placeholder="Write a reply to this review..."
-          className="flex-1 bg-transparent outline-none text-xs text-gray-700 dark:text-white placeholder-gray-400"
-        />
-        <button
-          type="submit"
-          disabled={isSending || !replyText.trim()}
-          className="w-7 h-7 flex items-center justify-center rounded-full shrink-0
-            bg-gradient-to-br from-primary to-orange-500 text-white
-            disabled:opacity-50 transition-all hover:opacity-90"
-        >
-          {isSending ? <Loader size={11} className="animate-spin" /> : <Send size={11} />}
-        </button>
-      </form>
-
-      {/* Toggle Replies */}
-      <button
-        onClick={toggleReplies}
-        className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:opacity-70 transition-opacity"
-      >
-        {repliesOpen
-          ? <><ChevronUp size={13} /> Hide Replies</>
-          : <><ChevronDown size={13} /> {repliesLoaded ? `${repliesCount} Repl${repliesCount === 1 ? 'y' : 'ies'}` : 'View Replies'}</>
-        }
-      </button>
-
-      {/* Replies List */}
-      <AnimatePresence>
-        {repliesOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="pl-3 border-l-2 border-primary/20 space-y-2 pt-1">
-              {repliesLoading ? (
-                <div className="flex justify-center py-4">
-                  <Loader className="animate-spin text-primary" size={20} />
-                </div>
-              ) : replies.length === 0 ? (
-                <p className="text-xs text-gray-400 py-2">No replies yet.</p>
-              ) : (
-                replies.map(reply => (
-                  <div key={reply.id} className={`${neuSmall} rounded-2xl p-3`}>
-                    {editingReply?.id === reply.id ? (
-                      <div className="space-y-2">
-                        <input
-                          autoFocus
-                          value={editText}
-                          onChange={e => setEditText(e.target.value)}
-                          onKeyDown={e => e.key === 'Enter' && handleUpdate()}
-                          className={`w-full px-3 py-2 rounded-full text-xs outline-none text-gray-700 dark:text-white bg-transparent ${neuInset}`}
-                        />
-                        <div className="flex gap-2 justify-end">
-                          <button
-                            type="button"
-                            onClick={() => setEditingReply(null)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold text-gray-500 ${neuSmall}`}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={handleUpdate}
-                            disabled={isUpdating || !editText.trim()}
-                            className="px-3 py-1.5 rounded-full text-[10px] font-bold text-white
-                              bg-gradient-to-r from-primary to-orange-500
-                              disabled:opacity-50 transition-all hover:opacity-90"
-                          >
-                            {isUpdating ? 'Saving...' : 'Save'}
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-700 dark:text-gray-200 leading-relaxed">
-                            {reply.replyText}
-                          </p>
-                          <p className="text-[10px] text-gray-400 mt-1">
-                            {new Date(reply.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric', month: 'short', day: 'numeric',
-                            })}
-                          </p>
-                        </div>
-                        <div className="flex gap-1 shrink-0">
-                          <button
-                            onClick={() => { setEditingReply(reply); setEditText(reply.replyText); }}
-                            className={`w-6 h-6 flex items-center justify-center rounded-lg ${neuSmall} text-gray-400 hover:text-primary transition-colors`}
-                          >
-                            <Edit size={10} />
-                          </button>
-                          <button
-                            onClick={() => setDeletingId(reply.id)}
-                            className={`w-6 h-6 flex items-center justify-center rounded-lg ${neuSmall} text-gray-400 hover:text-red-500 transition-colors`}
-                          >
-                            <Trash2 size={10} />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
+      {/* Images — compact fixed strip when present */}
+      {images.length > 0 && (
+        <div className="mt-3 h-20 shrink-0 flex gap-2 overflow-hidden">
+          {images.slice(0, 3).map((src, i) => (
+            <ReviewImage key={`${src}-${i}`} src={src} />
+          ))}
+          {images.length > 3 && (
+            <div className={`h-full aspect-square rounded-xl flex items-center justify-center text-xs font-bold text-gray-400 ${neuInset}`}>
+              +{images.length - 3}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </div>
+      )}
+
+      {/* Footer actions — pinned so bottoms align across the row */}
+      <div className="mt-auto pt-4 space-y-3">
+        <form onSubmit={handleReply} className={`flex items-center gap-2 px-4 py-2.5 rounded-full ${neuInset}`}>
+          <input
+            value={replyText}
+            onChange={e => setReplyText(e.target.value)}
+            placeholder="Write a reply..."
+            className="flex-1 bg-transparent outline-none text-xs text-gray-700 dark:text-white placeholder-gray-400"
+          />
+          <button
+            type="submit"
+            disabled={isSending || !replyText.trim()}
+            className="w-7 h-7 flex items-center justify-center rounded-full shrink-0
+              bg-gradient-to-br from-primary to-orange-500 text-white
+              disabled:opacity-50 transition-all hover:opacity-90"
+          >
+            {isSending ? <Loader size={11} className="animate-spin" /> : <Send size={11} />}
+          </button>
+        </form>
+
+        <button
+          onClick={toggleReplies}
+          className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:opacity-70 transition-opacity"
+        >
+          {repliesOpen
+            ? <><ChevronUp size={13} /> Hide Replies</>
+            : <><ChevronDown size={13} /> {repliesLoaded ? `${repliesCount} Repl${repliesCount === 1 ? 'y' : 'ies'}` : 'View Replies'}</>
+          }
+        </button>
+
+        <AnimatePresence>
+          {repliesOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="pl-3 border-l-2 border-primary/20 space-y-2 pt-1">
+                {repliesLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Loader className="animate-spin text-primary" size={20} />
+                  </div>
+                ) : replies.length === 0 ? (
+                  <p className="text-xs text-gray-400 py-2">No replies yet.</p>
+                ) : (
+                  replies.map(reply => (
+                    <div key={reply.id} className={`${neuSmall} rounded-2xl p-3`}>
+                      {editingReply?.id === reply.id ? (
+                        <div className="space-y-2">
+                          <input
+                            autoFocus
+                            value={editText}
+                            onChange={e => setEditText(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleUpdate()}
+                            className={`w-full px-3 py-2 rounded-full text-xs outline-none text-gray-700 dark:text-white bg-transparent ${neuInset}`}
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setEditingReply(null)}
+                              className={`px-3 py-1.5 rounded-full text-[10px] font-semibold text-gray-500 ${neuSmall}`}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleUpdate}
+                              disabled={isUpdating || !editText.trim()}
+                              className="px-3 py-1.5 rounded-full text-[10px] font-bold text-white
+                                bg-gradient-to-r from-primary to-orange-500
+                                disabled:opacity-50 transition-all hover:opacity-90"
+                            >
+                              {isUpdating ? 'Saving...' : 'Save'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-700 dark:text-gray-200 leading-relaxed">
+                              {reply.replyText}
+                            </p>
+                            <p className="text-[10px] text-gray-400 mt-1">
+                              {new Date(reply.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric', month: 'short', day: 'numeric',
+                              })}
+                            </p>
+                          </div>
+                          <div className="flex gap-1 shrink-0">
+                            <button
+                              onClick={() => { setEditingReply(reply); setEditText(reply.replyText); }}
+                              className={`w-6 h-6 flex items-center justify-center rounded-lg ${neuSmall} text-gray-400 hover:text-primary transition-colors`}
+                            >
+                              <Edit size={10} />
+                            </button>
+                            <button
+                              onClick={() => setDeletingId(reply.id)}
+                              className={`w-6 h-6 flex items-center justify-center rounded-lg ${neuSmall} text-gray-400 hover:text-red-500 transition-colors`}
+                            >
+                              <Trash2 size={10} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {deletingId && (
         <DeleteConfirmModal

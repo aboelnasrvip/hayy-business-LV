@@ -16,6 +16,7 @@ import {
 import { Place } from "@/services/placesService";
 import { postsAPI, Post } from "@/services/postsService";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 
 const neu =
@@ -42,11 +43,13 @@ interface Props {
 }
 
 const PlaceDetailPanel = ({ place, onClose, onEdit }: Props) => {
+  const { user } = useAppSelector((s) => s.auth);
+  const userId = user?.id ?? "";
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [showAddPost, setShowAddPost] = useState(false);
   const [postContent, setPostContent] = useState("");
-  const [postAttachments, setPostAttachments] = useState("");
+  const [postImageFile, setPostImageFile] = useState<File | null>(null);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [deletingPost, setDeletingPost] = useState<Post | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,20 +65,25 @@ const PlaceDetailPanel = ({ place, onClose, onEdit }: Props) => {
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userId) {
+      toast.error("User not found. Please log in again.");
+      return;
+    }
     setIsSubmitting(true);
     try {
-      const newPost = await postsAPI.createPost({
-        placeId: place.id,
-        content: postContent,
-        postAttachments,
-      });
-      setPosts((p) => [newPost, ...p]);
+      await postsAPI.createPost(
+        { userId, placeId: place.id, content: postContent },
+        postImageFile ?? undefined,
+      );
+      const res = await postsAPI.getPostsByPlace(place.id);
+      setPosts(res.data);
       setPostContent("");
-      setPostAttachments("");
+      setPostImageFile(null);
       setShowAddPost(false);
       toast.success("Post created!");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to create post");
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || "Failed to create post");
     } finally {
       setIsSubmitting(false);
     }
@@ -88,15 +96,17 @@ const PlaceDetailPanel = ({ place, onClose, onEdit }: Props) => {
     try {
       await postsAPI.updatePost(editingPost.id, {
         content: editingPost.content,
-        postAttachments: editingPost.postAttachments,
+        userId,
+        placeId: place.id,
       });
       setPosts((p) =>
         p.map((post) => (post.id === editingPost.id ? editingPost : post)),
       );
       setEditingPost(null);
       toast.success("Post updated!");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to update post");
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || "Failed to update post");
     } finally {
       setIsSubmitting(false);
     }
@@ -253,33 +263,31 @@ const PlaceDetailPanel = ({ place, onClose, onEdit }: Props) => {
                     className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 resize-none"
                   />
                 </div>
-                <div
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-full ${neuInset}`}
-                >
-                  <input
-                    value={
-                      editingPost
-                        ? editingPost.postAttachments
-                        : postAttachments
-                    }
-                    onChange={(e) =>
-                      editingPost
-                        ? setEditingPost({
-                            ...editingPost,
-                            postAttachments: e.target.value,
-                          })
-                        : setPostAttachments(e.target.value)
-                    }
-                    placeholder="Attachment URL (optional)"
-                    className="flex-1 bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400"
-                  />
-                </div>
+                {!editingPost && (
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="panel-post-image"
+                      className="hidden"
+                      onChange={(e) => setPostImageFile(e.target.files?.[0] ?? null)}
+                    />
+                    <label
+                      htmlFor="panel-post-image"
+                      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold cursor-pointer
+                        text-gray-500 hover:text-primary transition-colors ${neuSmall}`}
+                    >
+                      {postImageFile ? postImageFile.name : "Upload Image (optional)"}
+                    </label>
+                  </div>
+                )}
                 <div className="flex gap-2 justify-end">
                   <button
                     type="button"
                     onClick={() => {
                       setShowAddPost(false);
                       setEditingPost(null);
+                      setPostImageFile(null);
                     }}
                     className={`px-4 py-2 rounded-full text-xs font-semibold text-gray-500 ${neuSmall}`}
                   >

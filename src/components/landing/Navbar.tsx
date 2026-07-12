@@ -19,7 +19,6 @@ const Navbar = () => {
     { name: t("nav.about"), href: "#hero" },
     { name: t("nav.features"), href: "#features" },
     { name: t("nav.pricing"), href: "#pricing" },
-    
   ];
 
   return (

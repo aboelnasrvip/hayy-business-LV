@@ -270,13 +270,14 @@ const PlaceProfilePage = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
                 {reviews.map((review, i) => (
                   <motion.div
                     key={review.id}
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.06 }}
+                    className="h-full"
                   >
                     <ReviewCard review={review} />
                   </motion.div>

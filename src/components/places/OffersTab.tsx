@@ -31,17 +31,22 @@ const OffersTab = ({ placeId }: Props) => {
   const [deletingOffer, setDeletingOffer] = useState<Offer | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState<CreateOfferRequest>(emptyForm(placeId));
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  useEffect(() => {
+  const reload = () =>
     offersAPI.getByPlace(placeId)
       .then(setOffers)
-      .catch(() => toast.error('Failed to load offers'))
-      .finally(() => setIsLoading(false));
+      .catch(() => toast.error('Failed to load offers'));
+
+  useEffect(() => {
+    setIsLoading(true);
+    reload().finally(() => setIsLoading(false));
   }, [placeId]);
 
   const openAdd = () => {
     setForm(emptyForm(placeId));
     setEditingOffer(null);
+    setImageFile(null);
     setShowForm(true);
   };
 
@@ -55,6 +60,7 @@ const OffersTab = ({ placeId }: Props) => {
       endDate: offer.endDate.slice(0, 10),
     });
     setEditingOffer(offer);
+    setImageFile(null);
     setShowForm(true);
   };
 
@@ -63,18 +69,19 @@ const OffersTab = ({ placeId }: Props) => {
     setIsSubmitting(true);
     try {
       if (editingOffer) {
-        const updated = await offersAPI.update(editingOffer.id, form);
-        setOffers(prev => prev.map(o => o.id === editingOffer.id ? updated : o));
+        await offersAPI.update(editingOffer.id, form, imageFile ?? undefined);
         toast.success('Offer updated!');
       } else {
-        const created = await offersAPI.create(form);
-        setOffers(prev => [created, ...prev]);
+        await offersAPI.create(form, imageFile ?? undefined);
         toast.success('Offer created!');
       }
       setShowForm(false);
       setEditingOffer(null);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Operation failed');
+      setImageFile(null);
+      await reload();
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || 'Operation failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -88,8 +95,9 @@ const OffersTab = ({ placeId }: Props) => {
       setOffers(prev => prev.filter(o => o.id !== deletingOffer.id));
       setDeletingOffer(null);
       toast.success('Offer deleted!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to delete offer');
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || 'Failed to delete offer');
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +105,6 @@ const OffersTab = ({ placeId }: Props) => {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs text-gray-400">{offers.length} offer(s)</p>
         <button
@@ -111,7 +118,6 @@ const OffersTab = ({ placeId }: Props) => {
         </button>
       </div>
 
-      {/* Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className={`${neuCard} rounded-2xl p-4 space-y-3`}>
           <input
@@ -126,6 +132,19 @@ const OffersTab = ({ placeId }: Props) => {
               placeholder="Description *"
               className="w-full bg-transparent outline-none text-sm text-gray-700 dark:text-white placeholder-gray-400 resize-none"
             />
+          </div>
+          <div>
+            <input
+              type="file" accept="image/*" id="offers-tab-image" className="hidden"
+              onChange={e => setImageFile(e.target.files?.[0] ?? null)}
+            />
+            <label
+              htmlFor="offers-tab-image"
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold cursor-pointer
+                text-gray-500 hover:text-primary transition-colors ${neuSmall}`}
+            >
+              {imageFile ? imageFile.name : 'Upload Image (optional)'}
+            </label>
           </div>
           <div className={`flex items-center gap-3 px-4 py-2.5 rounded-full ${neuInset}`}>
             <Percent size={14} className="text-primary shrink-0" />
@@ -158,7 +177,7 @@ const OffersTab = ({ placeId }: Props) => {
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={() => { setShowForm(false); setEditingOffer(null); }}
+              onClick={() => { setShowForm(false); setEditingOffer(null); setImageFile(null); }}
               className={`px-4 py-2 rounded-full text-xs font-semibold text-gray-500 ${neuSmall}`}
             >
               Cancel
@@ -176,7 +195,6 @@ const OffersTab = ({ placeId }: Props) => {
         </form>
       )}
 
-      {/* List */}
       {isLoading ? (
         <div className="flex justify-center py-8">
           <Loader className="animate-spin text-primary" size={24} />
@@ -186,8 +204,7 @@ const OffersTab = ({ placeId }: Props) => {
           <p className="text-sm text-gray-400">No offers yet. Create your first offer!</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3  gap-4">  
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {offers.map(offer => (
             <div key={offer.id} className={`${neuCard} rounded-2xl p-4`}>
               <div className="flex items-start justify-between gap-2">
@@ -237,7 +254,6 @@ const OffersTab = ({ placeId }: Props) => {
               </div>
             </div>
           ))}
-          </div>
         </div>
       )}
 

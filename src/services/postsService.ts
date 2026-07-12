@@ -23,9 +23,9 @@ export interface PostsResponse {
 }
 
 export interface CreatePostRequest {
+  userId: string;
   placeId: string;
   content: string;
-  postAttachments: string;
 }
 
 export interface Comment {
@@ -58,18 +58,34 @@ export const postsAPI = {
     return response.data;
   },
 
-  createPost: async (data: CreatePostRequest): Promise<Post> => {
-    const response = await axiosInstance.post("/api/BusinessPosts", data);
+  createPost: async (data: CreatePostRequest, imageFile?: File): Promise<Post> => {
+    const fd = new FormData();
+    fd.append("UserId", data.userId);
+    fd.append("PlaceId", data.placeId);
+    fd.append("Content", data.content);
+    if (imageFile) fd.append("ImageFile", imageFile);
+
+    const response = await axiosInstance.post("/api/BusinessPosts", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 
   updatePost: async (
     postId: string,
-    data: Partial<CreatePostRequest>,
+    data: { content: string; userId?: string; placeId?: string },
+    imageFile?: File,
   ): Promise<Post> => {
+    const fd = new FormData();
+    fd.append("Content", data.content);
+    if (data.userId) fd.append("UserId", data.userId);
+    if (data.placeId) fd.append("PlaceId", data.placeId);
+    if (imageFile) fd.append("ImageFile", imageFile);
+
     const response = await axiosInstance.put(
       `/api/BusinessPosts/${postId}`,
-      data,
+      fd,
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
     return response.data;
   },
@@ -89,4 +105,3 @@ export const postsAPI = {
     await axiosInstance.post(`/api/BusinessPosts/${commentId}/reply`, { content });
   },
 };
-
